@@ -23,7 +23,7 @@
     {id:'brand-hm46',code:'TY-HM46-170',type:'brand',name:'腾原智造 抗磨液压油 L-HM 46',description:'高压 · 淡黄色 · 蓝盖蓝黄蓝桶',category:'industrial',spec:'170kg / 桶',weightKg:170,price:1910,cost:1820,stockTons:11.56,qty:10},
     {id:'brand-dah46',code:'TY-DAH46-170',type:'brand',name:'腾原智造 空气压缩机油 L-DAH 46',description:'优选·经典 · 淡黄色 · 浅蓝桶',category:'industrial',spec:'170kg / 桶',weightKg:170,price:1980,cost:1890,stockTons:0,qty:10}
   ].map(p=>Object.freeze({...p,floor:floorPrice(p.price,p.weightKg),pricePerTon:round(p.price*1000/p.weightKg)}));
-  function evaluate({lines=[],coupon=0,delivery='pickup',address='',rule=permission}) {
+  function evaluate({lines=[],coupon=0,delivery='pickup',address='',freightRate='',rule=permission}) {
     const errors=[];
     if(!lines.length)errors.push('请先选择商品。');
     const rows=lines.map((p,index)=>{
@@ -48,8 +48,10 @@
     const salesDiscount=round(rows.reduce((n,p)=>n+Math.max(0,p.listAmount-p.amount),0));
     if(rule.cap!=null&&salesDiscount>rule.cap+.001)errors.push(`销售让利总额超过单笔上限 ¥${rule.cap.toFixed(2)}。`);
     const couponDisabled=rows.some(p=>p.quote>p.price+.001);
-    const freight=delivery==='delivery'&&address?round(tons*60):0;
-    if(delivery==='delivery'&&!address)errors.push('请选择配送地址，以匹配运费。');
+    const validFreight=String(freightRate).trim()!==''&&Number.isFinite(Number(freightRate))&&Number(freightRate)>=0;
+    if(delivery==='delivery'&&!validFreight)errors.push('请填写有效运费单价。');
+    const freight=delivery==='delivery'&&validFreight?round(tons*Number(freightRate)):0;
+    if(delivery==='delivery'&&!address)errors.push('请选择配送地址。');
     const base=round(productTotal+packagingTotal+freight);
     const appliedCoupon=couponDisabled?0:Math.min(Math.max(0,Number(coupon)||0),base);
     const maxEta=rows.some(p=>p.eta.days===null)?null:Math.max(0,...rows.map(p=>p.eta.days));
