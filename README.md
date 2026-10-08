@@ -1,7 +1,8 @@
 # 腾原销售原型
 
-最新原型版本：v218。包含销售折扣管理、PC 销售报价与订单、小程序及需求说明。
+当前原型版本：v218。
 
-网页文件在 `site/`。本地启动使用 `python3 start-lan.py`，或双击对应系统的 start 文件。
+网页通过 GitHub Pages 免费公开发布，main 分支更新后自动发布。
+静态页面位于 `site/`，无需构建。根目录入口自动跳转至 `site/`。
 
-静态网页部署目录：`site`，无需构建。仓库私有；网页访问权限由部署服务单独设置。
+本地运行可使用 start-mac.command、start-windows.bat 或 start-lan.py。
