@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>腾原销售报价与折扣权限 Demo</title>
+  <meta name="description" content="销售小程序报价下单与后台折扣权限联动交互原型" />
+  <link rel="stylesheet" href="./permission-admin.css?v=4fd5375a43aa" />
+  <link rel="stylesheet" href="./pc-sales.css?v=6f870ada34ef" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230b4cac'/%3E%3Cpath d='M17 19h30v8H36v22h-9V27H17z' fill='white'/%3E%3Ccircle cx='45' cy='44' r='7' fill='%2316a394'/%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --navy:#10233d;--blue:#0b4cac;--blue2:#1768d5;--ink:#172234;--muted:#66758a;
+      --line:#dfe6ef;--bg:#f3f6fa;--card:#fff;--green:#087f67;--green-bg:#eaf8f3;
+      --red:#c83b37;--red-bg:#fff1f0;--amber:#a65b00;--amber-bg:#fff7e8;--shadow:0 16px 44px rgba(20,46,82,.11);
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:16px}
+    button,input,select,textarea{font:inherit} button{cursor:pointer}
+    .topbar{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 28px;position:sticky;top:0;z-index:20}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px;color:var(--navy)}
+    .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--blue),#0d75bd);display:grid;place-items:center;color:#fff;font-weight:900;box-shadow:0 7px 18px rgba(11,76,172,.25)}
+    .brand small{font-size:13px;font-weight:600;color:var(--muted);display:block;margin-top:2px}
+    .view-tabs{margin-left:auto;background:#eef2f7;padding:4px;border-radius:12px;display:flex;gap:4px}
+    .view-tab{border:0;background:transparent;color:#536175;padding:10px 16px;border-radius:9px;font-weight:700}
+    .view-tab.active{background:#fff;color:var(--blue);box-shadow:0 2px 8px rgba(19,45,78,.09)}
+    .layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 70px)}
+    .sidebar{background:#12263f;color:#c6d2e2;padding:24px 16px}
+    body.mobile-mode .layout{grid-template-columns:1fr}
+    body.mobile-mode .sidebar{display:none}
+    .side-caption{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8193aa;margin:10px 12px}
+    .side-item{width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:13px 14px;border-radius:10px;margin:3px 0;display:flex;align-items:center;gap:10px;font-weight:650}
+    .side-item.active{background:#1d4676;color:#fff}.side-item .dot{width:8px;height:8px;border-radius:50%;background:#657b97}.side-item.active .dot{background:#65b7ff}
+    .main{padding:28px 32px 60px;min-width:0}.page{display:none}.page.active{display:block}
+    .page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px}
+    h1{font-size:28px;margin:0 0 7px;color:var(--navy);letter-spacing:-.02em}.sub{color:var(--muted);line-height:1.6}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:700;background:#eaf2ff;color:var(--blue)}
+    .badge.green{background:var(--green-bg);color:var(--green)}.badge.amber{background:var(--amber-bg);color:var(--amber)}
+    .primary,.secondary,.ghost,.danger{border-radius:9px;padding:10px 16px;border:1px solid transparent;font-weight:750;transition:.18s}
+    .primary{background:var(--blue);color:#fff;box-shadow:0 6px 15px rgba(11,76,172,.2)}.primary:hover{background:#093f90}.primary:disabled{background:#aeb9c9;box-shadow:none;cursor:not-allowed}
+    .secondary{background:#fff;border-color:#b9c9dd;color:var(--blue)}.secondary:hover{background:#eef5ff}.ghost{background:transparent;color:#536175}.danger{background:#fff;border-color:#efc2c0;color:var(--red)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:0 4px 16px rgba(23,50,82,.04)}
+    .toolbar{padding:16px 18px;display:flex;align-items:center;gap:12px;margin-bottom:14px}.toolbar .spacer{flex:1}
+    .select,.input{height:42px;border:1px solid #cfd9e6;border-radius:9px;background:#fff;padding:0 12px;color:var(--ink);outline:none}.select:focus,.input:focus,textarea:focus{border-color:#78a6e8;box-shadow:0 0 0 3px #eaf2ff}
+    .table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse;min-width:900px}.data-table th{font-size:13px;color:#627187;text-align:left;background:#f7f9fc;padding:13px 15px;border-bottom:1px solid var(--line)}
+    .data-table td{padding:15px;border-bottom:1px solid #e9eef4;vertical-align:middle}.data-table tr:last-child td{border-bottom:0}.data-table strong{display:block}.meta{font-size:13px;color:var(--muted);margin-top:3px}
+    .status{font-size:13px;font-weight:750;padding:5px 9px;border-radius:999px;background:var(--green-bg);color:var(--green)}.status.off{background:#eef1f5;color:#7b8797}
+    .link-btn{border:0;background:transparent;color:var(--blue);font-weight:750;padding:6px}
+    .note{padding:14px 16px;border-radius:11px;background:#f0f6ff;border:1px solid #cfe0fa;color:#31547d;line-height:1.55;margin-bottom:16px}
+    .assumption{margin-top:16px;padding:13px 16px;border-left:4px solid #d99022;background:var(--amber-bg);color:#7e4c08;line-height:1.55}
+    .audit{margin-top:18px;padding:18px}.audit h2{font-size:18px;margin:0 0 14px}.audit-row{display:grid;grid-template-columns:110px 1fr 150px;gap:16px;padding:12px 0;border-top:1px solid #edf1f5;color:#46566b}.audit-row:first-of-type{border-top:0}
+    .drawer-backdrop{position:fixed;inset:0;background:rgba(12,27,47,.45);z-index:40;display:none}.drawer-backdrop.open{display:block}.drawer{position:absolute;right:0;top:0;height:100%;width:min(520px,94vw);background:#fff;box-shadow:-20px 0 50px rgba(8,22,40,.2);display:flex;flex-direction:column}
+    .drawer-head{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.drawer-head h2{margin:0;font-size:22px}.close{border:0;background:#eff3f8;border-radius:50%;width:36px;height:36px;font-size:22px;color:#536175}
+    .drawer-body{padding:22px 24px;overflow:auto;flex:1}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:14px;font-weight:750;color:#405169}.field small{color:var(--muted);line-height:1.4}.field textarea{border:1px solid #cfd9e6;border-radius:9px;padding:11px;min-height:80px;resize:vertical;outline:none}
+    .radio-row{display:flex;gap:8px}.choice{flex:1;border:1px solid #cfd9e6;border-radius:9px;padding:10px 8px;text-align:center;font-weight:700;color:#5e6c7e;background:#fff}.choice.active{border-color:var(--blue);color:var(--blue);background:#eef5ff}
+    .drawer-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+    .prototype-shell{display:grid;grid-template-columns:minmax(0,1fr) 405px;gap:26px;align-items:start}.spec-panel{display:flex;flex-direction:column;gap:14px}.spec-card{padding:18px}.spec-card h3{margin:0 0 12px;font-size:17px}.flow-step{display:flex;gap:12px;padding:12px 0;border-top:1px solid #edf1f5}.flow-step:first-of-type{border-top:0}.num{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#eaf2ff;color:var(--blue);font-weight:800;flex:0 0 auto}.flow-step p{margin:2px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+    .scenario-select{width:100%;height:46px;border:1px solid #b9c9dd;border-radius:10px;background:#fff;padding:0 12px;font-weight:750;color:var(--navy);outline:none}.scenario-select:focus{border-color:#78a6e8;box-shadow:0 0 0 3px #eaf2ff}.scenario-summary{margin-top:12px;padding:13px 14px;border-radius:10px;background:#f5f8fc;border:1px solid #e2e9f2;line-height:1.6;color:#4d6078}.scenario-summary strong{color:var(--navy)}.test-label{display:block;margin:16px 0 7px;font-size:13px;font-weight:800;color:#536175}.rule-stack{display:grid;gap:9px}.rule-line{display:flex;justify-content:space-between;gap:18px;padding:10px 0;border-top:1px solid #edf1f5}.rule-line:first-child{border-top:0}.rule-line span{color:var(--muted);font-size:14px}.rule-line strong{text-align:right;font-size:14px}.pending-note{margin-top:12px;padding:10px 12px;border-radius:9px;background:var(--amber-bg);color:#7e4c08;font-size:13px;line-height:1.5}.change-summary{margin:12px 0 16px;padding:13px 16px;border-radius:10px;background:var(--amber-bg);border:1px solid #f1d9aa;color:#6f470d}.change-summary[hidden]{display:none}.change-summary-title{font-size:14px;font-weight:850;margin-bottom:7px}.change-summary ul{margin:0;padding-left:20px}.change-summary li{padding:2px 0;line-height:1.55;font-size:13px}.change-summary li::marker{color:#d99022}
+    .phone-wrap{position:sticky;top:95px}.phone{background:#121d2e;border-radius:35px;padding:10px;box-shadow:var(--shadow);max-width:390px;margin:auto}.phone-screen{background:#f4f6f9;border-radius:27px;overflow:hidden;min-height:690px;position:relative}.phone-view{display:none;min-height:690px;position:relative}.phone-view.active{display:block}.phone-top{height:48px;background:#fff;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #e6ebf1;font-weight:800}.phone-top .back{position:absolute;left:18px;font-size:25px;font-weight:400;border:0;background:transparent;color:var(--ink);padding:2px 8px}.phone-top .top-action{position:absolute;right:16px;border:0;background:transparent;color:var(--blue);font-size:13px;font-weight:750}.screen-scroll{padding-bottom:86px;max-height:680px;overflow:auto}.section-title{padding:12px 16px 8px;font-size:14px;font-weight:800;color:#30435e}.mobile-card{background:#fff;border-top:1px solid #e6ebf1;border-bottom:1px solid #e6ebf1;padding:0 16px;margin-bottom:10px}.row{display:grid;grid-template-columns:115px 1fr;align-items:center;min-height:49px;border-bottom:1px solid #edf1f5;gap:8px}.row:last-child{border-bottom:0}.row label{color:#5a687a;font-size:14px}.row .value{text-align:right;font-weight:650;font-size:14px}.row input,.row select{width:100%;height:36px;border:0;text-align:right;background:transparent;outline:none;color:var(--ink);font-weight:700}.row input.bad{color:var(--red)}
+    .product-title{display:flex;justify-content:space-between;align-items:flex-start;padding:13px 0;font-weight:800;line-height:1.35}.sku-tag{font-size:12px;background:#eef5ff;color:var(--blue);padding:4px 7px;border-radius:6px;white-space:nowrap;margin-left:10px}
+    .price-hint{text-align:right;font-size:12px;margin:-5px 0 10px;color:var(--blue)}.price-hint.error{color:var(--red)}
+    .stock-line{display:flex;justify-content:space-between;align-items:center;background:#f1f8f6;border-radius:9px;padding:10px 11px;margin:10px 0 6px;color:#38645c;font-size:13px}.stock-line strong{color:var(--green)}.stock-line.warn{background:var(--amber-bg);color:#7e4c08}.stock-line.warn strong{color:var(--amber)}.stock-line.error{background:var(--red-bg);color:var(--red)}.stock-line.error strong{color:var(--red)}
+    .supply-detail{font-size:12px;color:var(--muted);line-height:1.5;margin:0 2px 10px}.decision-line{margin:10px 16px 0;padding:10px 12px;border-radius:9px;background:var(--green-bg);color:var(--green);font-size:13px;font-weight:750;line-height:1.45}.decision-line.warn{background:var(--amber-bg);color:#7e4c08}.decision-line.error{background:var(--red-bg);color:var(--red)}
+    .mobile-tabs{height:46px;background:#fff;display:flex;align-items:end;border-bottom:1px solid #e4eaf1;overflow:auto}.mobile-tab{border:0;background:transparent;padding:0 13px 11px;color:#5d6878;font-size:13px;white-space:nowrap}.mobile-tab.active{color:var(--blue);font-weight:800;border-bottom:3px solid var(--blue)}
+    .order-search{height:54px;background:#fff;display:grid;grid-template-columns:auto 1px minmax(0,1fr) auto;align-items:center;gap:10px;padding:0 16px}.filter-control{border:0;background:#fff;color:#1f2937;font-weight:700;padding:0;font-size:13px}.search-divider{height:22px;background:#c9d1dc}.search-input{height:36px;border:0;border-radius:20px;background:#f4f6f9;padding:0 14px;color:#4b596c;outline:none;min-width:0}.search-button{border:0;background:#fff;color:var(--blue);font-weight:750;padding:0;font-size:13px}
+    .order-list-scroll{padding-bottom:12px}.order-card{background:#fff;padding:14px 10px 15px;border-bottom:10px solid #f0f2f6}.order-head,.order-bottom-line{display:flex;justify-content:space-between;gap:8px;align-items:center}.order-head{font-size:13px}.order-tags{display:flex;gap:5px}.mini-tag{padding:3px 6px;border-radius:3px;font-size:11px;font-weight:750;background:#ff9500;color:#fff}.mini-tag.blue{background:#1677e8;color:#fff}.order-meta-line{margin-top:9px;font-size:13px;color:#202936}.order-product{margin:3px 0 10px;background:#f3f7fd;padding:10px;border-radius:3px;font-size:12px;line-height:1.5}.order-product-title{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-weight:750;font-size:13px}.order-product-row{display:flex;justify-content:space-between;gap:8px;margin-top:6px}.order-business-line{display:flex;justify-content:space-between;gap:8px;align-items:center}.order-business-tags{display:flex;gap:5px}.outline-tag{border:1px solid #1783dc;color:#0f76c9;border-radius:2px;padding:1px 3px;font-size:11px;line-height:1.25}.required-date{color:#0757a4;font-size:12px;font-weight:800;white-space:nowrap}.order-bottom-line{margin-top:10px;font-size:12px}.order-amount{font-size:12px}.order-amount strong{color:#e31919;font-size:13px}.countdown{margin-top:10px;padding:9px 10px;border-radius:8px;background:var(--green-bg);color:var(--green);font-size:12px;font-weight:750}.countdown.expired{background:var(--red-bg);color:var(--red)}.detail-head{background:#fff;padding:14px 16px;border-bottom:8px solid #f0f2f6}.detail-head .line{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}.detail-head .line span:first-child{color:var(--muted)}.timeline{padding:14px 16px;background:#fff}.timeline-step{display:flex;gap:10px;padding:8px 0}.timeline-dot{width:10px;height:10px;border-radius:50%;background:var(--green);margin-top:5px;flex:0 0 auto}.timeline-step p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}.timeline-step strong{display:block;color:var(--ink);font-size:13px}.lifecycle{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.life-step{padding:10px 6px;border-radius:8px;background:#f1f4f8;text-align:center;font-size:12px;color:var(--muted)}.life-step.active{background:#eaf2ff;color:var(--blue);font-weight:800}.life-step.done{background:var(--green-bg);color:var(--green);font-weight:800}
+    .brand-list{max-height:506px}.brand-order-scroll{max-height:612px}
+    .coupon-select{color:var(--ink);font-weight:750}.coupon-select:disabled{color:#98a4b4;cursor:not-allowed}
+    .summary{padding:12px 16px;background:#fff}.sum-row{display:flex;justify-content:space-between;padding:6px 0;color:#5b6879;font-size:14px}.sum-row.total{border-top:1px solid #e3e8ef;margin-top:7px;padding-top:12px;color:var(--ink);font-weight:850}.sum-row.total b{color:var(--red);font-size:20px}.subsidy{font-size:12px;color:var(--amber);background:var(--amber-bg);padding:8px 10px;border-radius:8px;margin-top:8px;display:none}
+    .mobile-actions{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #dde5ee;padding:10px 12px;display:flex;gap:9px}.mobile-actions .secondary{flex:.75}.mobile-actions .primary{flex:1.25}
+    .intent-list-actions{align-items:center;justify-content:space-between;padding:11px 16px;gap:16px}.intent-list-actions .intent-select-all{display:inline-flex;align-items:center;gap:9px;padding:5px 0;border:0;background:transparent;color:var(--ink);font-size:14px;cursor:pointer}.intent-select-mark{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#218de0;color:#fff;font-size:14px;line-height:1}.intent-select-all:not(.selected) .intent-select-mark{background:#fff;color:transparent;box-shadow:inset 0 0 0 1.5px #9cadc2}.intent-select-all:disabled{opacity:.45;cursor:not-allowed}.intent-list-actions .intent-order-button{flex:none;width:112px;border-radius:999px;padding:11px 14px;box-shadow:none}
+    .detail-summary{background:#fff;padding:10px 16px 12px;border-bottom:8px solid #f0f2f6}.detail-summary-row{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:8px;align-items:center;min-height:34px;font-size:13px}.detail-summary-row span:first-child{color:var(--muted)}.detail-summary-row strong{font-size:13px}.detail-status{background:#ff9500;color:#fff;border-radius:3px;padding:3px 7px;font-size:11px;font-weight:750}.detail-tabs{height:46px}.detail-tabs .mobile-tab{flex:1}.detail-content{background:#fff;padding:0 16px 120px;max-height:404px}.detail-section-title{font-size:15px;font-weight:800;padding:14px 0 8px}.detail-field{display:grid;grid-template-columns:125px minmax(0,1fr);gap:10px;align-items:center;min-height:48px;border-bottom:1px solid #edf1f5;font-size:13px}.detail-field span:first-child{color:#5a687a}.detail-field strong,.detail-field .detail-value{text-align:right;font-weight:650}.detail-product-section-head{display:flex;justify-content:space-between;align-items:center;margin:0 -16px;padding:13px 16px 10px;border-top:8px solid #f0f2f6;font-size:14px;font-weight:800}.detail-product-section-head span:last-child{font-size:12px}.detail-product-name{margin:0 -16px;padding:11px 16px;background:#f3f7fd;font-size:13px;font-weight:750;line-height:1.5}.guide-price{display:block;color:#e63636;font-size:11px;font-weight:500;margin-top:3px}.detail-spacer{min-height:58px;border-bottom:1px solid #edf1f5}.detail-totals{position:absolute;left:0;right:0;bottom:66px;background:#fff;border-top:1px solid #edf1f5;padding:8px 12px 6px;display:flex;justify-content:space-between;align-items:flex-end;font-size:12px;z-index:2}.detail-totals p{margin:2px 0}.detail-total-amount{text-align:right}.detail-total-amount strong{color:#e31919;font-size:13px}.detail-actions{padding:8px 12px;gap:14px}.detail-actions button{flex:1!important;font-size:14px;padding:14px 8px;border-radius:8px;box-shadow:none}.detail-actions .danger{border-color:var(--blue);color:var(--blue)}
+    .brand-search{height:48px;background:#fff;display:flex;gap:8px;align-items:center;padding:0 12px}.brand-search input{flex:1;min-width:0;border:0;border-radius:20px;background:#f4f6f9;height:34px;padding:0 13px;outline:none}.brand-search button{border:0;background:#fff;color:#176cca;font-weight:700}.brand-tabs{height:50px}.brand-tabs .mobile-tab{flex:1;font-size:14px}.brand-tabs .mobile-tab.active{color:#1f2630;border-bottom-color:#df1646}.brand-list{background:#f1f2f6;padding-bottom:74px}.brand-card{background:#fff;padding:14px 16px;margin-bottom:9px}.brand-title{font-size:13px;font-weight:800;line-height:1.45}.stock-badge{display:inline-block;margin-top:5px;border:1px solid #168be0;border-radius:4px;color:#168be0;font-size:11px;padding:1px 4px}.stock-badge.in-stock{border-color:#15916f;color:#087f67;background:#eff8f5}.stock-badge.out-stock{border-color:#168be0;color:#0f76c9;background:#eef6ff}.brand-meta{color:#8b96a4;font-size:11px;line-height:1.45}.tier-price{background:#f2f1ff;margin-top:8px;padding:7px 9px}.tier-row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px}.tier-row strong{color:#043e87}.brand-card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:#939ba6;font-size:11px}.brand-add{border:0;border-radius:5px;background:#063f91;color:#fff;padding:7px 10px;font-size:11px}.brand-add.disabled{background:#aaa}.brand-select-card{position:relative;margin:10px 16px 12px 42px;border-radius:4px;box-shadow:0 3px 14px rgba(26,46,78,.08)}.brand-check{position:absolute;left:-28px;top:50%;transform:translateY(-50%);width:20px;height:20px;border:0;border-radius:50%;background:#218de0;color:#fff;display:grid;place-items:center;font-size:13px;cursor:pointer}.brand-check.off{background:#fff;color:transparent;box-shadow:inset 0 0 0 1.5px #9cadc2}.brand-order-scroll{background:#f1f2f6;padding-bottom:78px}.brand-form-section{background:#fff;margin-bottom:8px}.brand-form-title{font-size:15px;font-weight:800;padding:11px 16px;border-bottom:1px solid #edf1f5}.brand-form-row{display:grid;grid-template-columns:128px minmax(0,1fr);align-items:center;min-height:48px;padding:0 16px;border-bottom:1px solid #edf1f5;font-size:13px}.brand-form-row .required:before{content:'*';color:#e11b22;margin-right:2px}.brand-form-row .brand-value{text-align:right;font-weight:600}.brand-form-row .placeholder{color:#c2c7cf;font-weight:400}.brand-product-head{display:flex;justify-content:space-between;gap:8px;background:#edf3ff;padding:10px 16px;font-size:12px;line-height:1.45}.brand-product-actions{white-space:nowrap;color:#0b54a0}.brand-product-actions b{color:#e62833;margin-left:7px}.brand-order-footer{position:absolute;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid #dfe5ec;display:flex;align-items:center;gap:10px;padding:8px 10px;z-index:3}.brand-order-total{margin-right:auto;font-size:13px}.brand-order-total strong{display:block;color:#e00000;font-size:18px}.brand-order-footer button{padding:10px 12px;font-size:12px}.brand-original-label{padding:7px 12px;background:#fff7df;color:#81590b;border-bottom:1px solid #f0dfaa;font-size:11px}.adjusted-note{padding:8px 12px;background:#eaf7f3;color:#087b66;border-bottom:1px solid #cceadf;font-size:11px;line-height:1.5}.brand-result{margin:8px 0;padding:8px 10px;border-radius:7px;background:#eff8f5;color:#247060;font-size:11px;line-height:1.45}.brand-price-hint{color:#0b62b5;text-align:right;font-size:11px;padding:0 16px 7px}.brand-form-row input,.brand-form-row select{width:100%;height:34px;border:0;background:transparent;text-align:right;outline:none;font-weight:700;color:var(--ink)}
+    .eta-label{position:relative;display:inline-flex;align-items:center;gap:5px;width:max-content}.eta-help{width:17px;height:17px;padding:0;border:1px solid #9aa8ba;border-radius:50%;background:#fff;color:#6c7b8f;font-size:11px;font-weight:800;line-height:15px;cursor:pointer}.eta-help:focus-visible{outline:2px solid #8bb8f0;outline-offset:2px}.eta-popover{display:none;position:absolute;left:0;top:calc(100% + 8px);width:178px;padding:9px 11px;border-radius:7px;background:#17263a;color:#fff;font-size:11px;font-weight:500;line-height:1.45;box-shadow:0 6px 18px rgba(18,35,58,.2);z-index:12}.eta-popover:before{content:'';position:absolute;left:58px;top:-5px;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:5px solid #17263a}.eta-label.open .eta-popover{display:block}
+    .delivery-method-trigger,.package-source-trigger{width:100%;min-height:48px;border:0;background:transparent;color:var(--ink);padding:0;display:flex;align-items:center;justify-content:flex-end;gap:7px;font-weight:700;text-align:right}.delivery-method-trigger .chevron,.package-source-trigger .chevron,.select-entry .chevron{color:#7c8796;font-size:16px;font-weight:500;line-height:1}.select-entry{position:relative;width:100%;display:flex;align-items:center}.brand-form-row .select-entry select{appearance:none;-webkit-appearance:none;padding-right:20px}.select-entry .chevron{position:absolute;right:0;pointer-events:none}.phone-action-mask{position:absolute;inset:0;background:rgba(15,27,44,.42);z-index:12;display:none;align-items:flex-end}.phone-action-mask.open{display:flex}.phone-action-sheet{width:100%;height:430px;max-height:72%;background:#fff;box-shadow:0 -10px 28px rgba(11,25,43,.16);animation:sheetUp .2s ease-out}.picker-head{height:54px;display:grid;grid-template-columns:76px 1fr 76px;align-items:center;background:#f1f1f1;border-bottom:1px solid #e3e3e3}.picker-head strong{text-align:center;font-size:17px;color:#111}.picker-head button{height:100%;border:0;background:transparent;font-size:15px}.picker-cancel{color:#999}.picker-confirm{color:#46639a}.picker-body{height:calc(100% - 54px);display:flex;flex-direction:column;justify-content:center;padding:0 16px}.phone-action-option{width:100%;min-height:62px;border:0;background:#fff;color:#929292;font-size:16px;border-top:1px solid transparent;border-bottom:1px solid transparent;line-height:1.4}.phone-action-option.selected{color:#222;font-size:18px;font-weight:700;border-color:#e5e5e5}.phone-action-option:focus-visible,.picker-head button:focus-visible,.delivery-method-trigger:focus-visible,.package-source-trigger:focus-visible{outline:2px solid #78a6e8;outline-offset:-3px}.package-extra-row{display:none}.package-extra-row.visible{display:flex}.package-demand,.package-demand:focus{border:0;outline:none;box-shadow:none;background:transparent}.package-demand{min-height:72px!important;padding:10px 0!important;text-align:left!important;resize:none}.upload-box{width:100%;height:70px;border:1px dashed #b8c7da;border-radius:8px;background:#f8fafc;color:#6c7b8f;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px}.guide-copy{color:#d22c2c;text-align:right;font-size:11px;padding:0 16px 7px}@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .oem-list{background:#f1f2f6;padding-bottom:76px}.oem-card{background:#fff;padding:13px 16px 12px;margin-bottom:9px}.oem-title{font-size:13px;font-weight:800;line-height:1.45}.oem-color{margin-left:6px;color:#6f7b8a;font-weight:500}.oem-type{display:inline-block;margin:5px 0 3px;border:1px solid #dda820;border-radius:4px;color:#bd7e00;font-size:11px;padding:1px 5px}.oem-meta{font-size:11px;line-height:1.55;color:#8b96a4}.oem-meta strong{color:#27364a}.oem-prices{margin-top:8px;background:#f2f1ff;padding:7px 9px}.oem-price-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:4px 0;font-size:11px;line-height:1.4}.oem-price-row strong{color:#043e87;text-align:right}.oem-region{display:block;color:#6f7b8a;margin-top:2px}.oem-result{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.oem-result-cell{background:#eff8f5;border-radius:7px;padding:8px 9px;font-size:11px;color:#477267;line-height:1.4}.oem-result-cell strong{display:block;color:#087f67;font-size:12px}.oem-result-cell.price{background:#eef5ff;color:#55708f}.oem-result-cell.price strong{color:#0b4cac}.oem-card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:#939ba6;font-size:11px}.oem-card-foot button{border:0;border-radius:5px;padding:7px 10px;font-size:11px}.oem-remove{background:#aaa;color:#fff}.oem-add{background:#063f91;color:#fff}.oem-tabs{height:50px}.oem-tabs .mobile-tab{flex:1;font-size:14px}.oem-tabs .mobile-tab.active{color:#1f2630;border-bottom-color:#df1646}
+    .inline-error{margin:10px 16px 0;padding:10px 12px;border-radius:9px;background:var(--red-bg);color:var(--red);font-size:13px;line-height:1.45;display:none}
+    .toast{position:absolute;left:50%;bottom:78px;transform:translate(-50%,25px);width:max-content;max-width:calc(100% - 28px);background:#10233d;color:#fff;padding:11px 16px;border-radius:9px;text-align:center;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:20;box-shadow:var(--shadow)}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .success-modal{position:fixed;inset:0;background:rgba(10,24,43,.45);display:none;place-items:center;z-index:60}.success-modal.open{display:grid}.success-card{width:min(420px,90vw);background:#fff;border-radius:18px;padding:28px;text-align:center;box-shadow:var(--shadow)}.success-icon{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--green-bg);color:var(--green);font-size:30px;margin:0 auto 14px}.success-card h2{margin:0 0 8px}.success-card p{color:var(--muted);line-height:1.55}.modal-actions{display:flex;gap:10px;margin-top:14px}.modal-actions button{flex:1}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}.sidebar{display:none}.main{padding:22px 16px 50px}.prototype-shell{grid-template-columns:1fr}.phone-wrap{position:static}.spec-panel{order:2}.phone-wrap{order:1}}
+    @media(max-width:620px){.topbar{height:auto;min-height:66px;padding:10px 14px;align-items:flex-start}.brand{font-size:17px}.brand small{display:none}.view-tabs{margin-left:auto}.view-tab{font-size:13px;padding:9px 10px}.page-head{flex-direction:column}.page-head .primary{width:100%}.toolbar{flex-wrap:wrap}.toolbar .spacer{display:none}.toolbar .primary{width:100%}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.audit-row{grid-template-columns:1fr;gap:4px}.main{padding:18px 10px 40px}h1{font-size:24px}.phone{border-radius:24px;padding:7px}.phone-screen{border-radius:19px}}
+    .mobile-spec-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}.spec-card .mobile-spec-heading h3{margin:0}.mobile-requirements-button{padding:8px 14px;font-size:14px;white-space:nowrap;background:var(--red);border-color:var(--red);color:#fff}.mobile-requirements-button:hover{background:#b5322f;border-color:#b5322f;color:#fff}
+    .mobile-requirements-dialog{width:min(860px,calc(100vw - 32px));max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:15px;color:var(--ink);background:#fff;box-shadow:var(--shadow)}.mobile-requirements-dialog::backdrop{background:rgba(12,27,47,.48)}.mobile-requirements-dialog[open]{display:flex;flex-direction:column}.mobile-requirements-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:1px solid var(--line);flex-shrink:0}.mobile-requirements-header h2{margin:0;font-size:21px;color:var(--navy)}.mobile-requirements-header form{margin:0}.mobile-requirements-body{padding:0 24px 24px;overflow-y:auto;min-height:0;line-height:1.75;font-size:16px;overscroll-behavior:contain}.mobile-requirements-body section{padding-top:22px}.mobile-requirements-body h3{font-size:17px;margin:0 0 10px;color:var(--navy)}.mobile-requirements-body p{margin:8px 0}.mobile-requirements-body ul{padding-left:22px;margin:8px 0}.mobile-requirements-body li+li{margin-top:10px}.mobile-requirements-body strong{color:var(--navy)}.mobile-requirements-footer{display:flex;justify-content:flex-end;padding:14px 24px;border-top:1px solid var(--line);margin:0;flex-shrink:0}.mobile-requirements-dialog button:focus-visible,.mobile-requirements-button:focus-visible{outline:3px solid #78a6e8;outline-offset:3px}@media(max-width:600px){.mobile-requirements-header,.mobile-requirements-footer{padding:16px}.mobile-requirements-header h2{font-size:18px}.mobile-requirements-body{padding:0 16px 20px}}
+      input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+  </style>
+</head>
+<body class="pc-mode">
+  <header class="topbar">
+    <div class="brand"><div class="logo">腾</div><div>腾原销售工作台</div></div>
+    <div class="view-tabs" role="tablist" aria-label="Demo页面">
+      <button class="view-tab active" data-page="pc">PC 销售端</button>
+      <button class="view-tab" data-page="mobile">销售小程序</button>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="admin-nav">
+      <div class="side-caption">运营管理</div>
+      <button class="side-item active"><span class="dot"></span>销售折扣管理</button>
+      </div>
+      <div class="pc-nav"></div>
+    </aside>
+    <main class="main">
+      <section id="admin" hidden>
+        <div class="page-head">
+          <div><h1>销售折扣管理</h1><div class="sub">给销售明确的自主让利空间；规则内直接报价，超出权限前端阻断。</div></div>
+          <button class="primary" id="addRule">＋ 新增权限</button>
+        </div>
+        <div class="note"><strong>简化原则：</strong>不做逐单审批，不设置优惠券式消费门槛。个人规则存在时优先使用个人规则，否则使用所属大区规则。</div>
+        <div class="card toolbar">
+          <select class="select" aria-label="授权对象筛选"><option>全部授权对象</option><option>销售个人</option><option>大区</option><option>运营</option></select>
+          <select class="select" aria-label="状态筛选"><option>全部状态</option><option>启用</option><option>停用</option></select>
+          <div class="spacer"></div><button class="secondary">查询</button>
+        </div>
+        <div class="card table-wrap">
+          <table class="data-table">
+            <thead><tr><th>规则名称</th><th>授权对象</th><th>让利方式</th><th>最大让利</th><th>单笔上限</th><th>有效期</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="ruleRows"></tbody>
+          </table>
+        </div>
+        <div class="card audit">
+          <h2>最近变更</h2>
+          <div id="auditRows">
+            <div class="audit-row"><span>今天 14:32</span><span><strong>华南大区默认权限</strong>：最大让利由 1.5% 调整为 2%</span><span>操作人：运营-谢云</span></div>
+            <div class="audit-row"><span>今天 10:18</span><span><strong>销售-张销售临时权限</strong>：新增，有效期7天</span><span>操作人：运营-谢云</span></div>
+          </div>
+        </div>
+        <div class="assumption"><strong>Demo待确认项：</strong>个人权限是否覆盖大区权限，以及“大区权限”是大区销售共用规则还是大区负责人本人权限。当前Demo采用“个人优先、大区兜底、不叠加”。</div>
+      </section>
+
+      <section id="pc" class="page active" aria-label="PC 销售工作台"></section>
+      <section id="mobile" class="page">
+        <div class="page-head">
+          <div><h1>销售小程序 · 报价下单</h1><div class="sub">切换页面可查看页面改动点，页面风格以实际小程序风格为主。</div></div>
+          <span class="badge green">规则联动演示</span>
+        </div>
+        <div class="prototype-shell">
+          <div class="spec-panel">
+            <div class="card spec-card">
+              <div class="mobile-spec-heading"><h3>切换页面</h3><button type="button" class="secondary mobile-requirements-button" id="mobileRequirements" aria-haspopup="dialog" aria-controls="mobileRequirementsDialog">需求说明</button></div>
+              <select id="phoneViewSelect" class="scenario-select" aria-label="选择小程序页面">
+                <option value="quoteView">① 产品报价</option>
+                <option value="intentListView">② 意向产品清单</option>
+                <option value="brandAdjustedOrderView">③ 提交意向单</option>
+                <option value="listView">④ 意向单列表</option>
+                <option value="intentView">⑤ 意向单详情</option>
+                <option value="formalView">⑥ 正式订单详情</option>
+              </select>
+              <div class="change-summary" id="pageChangeSummary" aria-live="polite">
+                <div class="change-summary-title" id="pageChangeTitle">① 产品报价 · 改动点</div>
+                <ul id="pageChangeList"></ul>
+              </div>
+              <h3>切换业务场景</h3>
+              <select id="scenarioSelect" class="scenario-select" aria-label="选择演示场景">
+                <option value="spot">① 现货充足</option>
+                <option value="production">② 现货不足，生产补足</option>
+                <option value="missingCycle">③ 缺少周期参数，交期待确认</option>
+                <option value="overPermission">④ 销售报价超权限，阻断提交</option>
+                <option value="aboveList">⑤ 报价高于挂牌价，禁用优惠</option>
+                <option value="couponBelowCost">⑥ 销售折扣叠加优惠券后低于成本，允许提交，运营担责</option>
+              </select>
+              <div class="scenario-summary" id="scenarioSummary"><strong>现货充足：</strong>库存覆盖需求，交期只计算发运周期；报价校验通过后可预占24小时。</div>
+            </div>
+            <div class="card spec-card">
+              <h3>系统当前采用的规则</h3>
+              <div class="rule-stack">
+                <div class="rule-line"><span>销售折扣权限</span><strong>当前销售最多让利2%</strong></div>
+                <div class="rule-line"><span>系统成本价</span><strong>¥165/桶（用于券后成本对比）</strong></div>
+                <div class="rule-line"><span>销售报价底线（用券前）</span><strong>我的报价不得低于当前销售最低可报价格</strong></div>
+                <div class="rule-line"><span>发运周期</span><strong>3天</strong></div>
+                <div class="rule-line"><span>生产周期</span><strong>5天</strong></div>
+                <div class="rule-line"><span>报价预占</span><strong>24小时，成单转正式占用</strong></div>
+              </div>
+              <div class="sub">以上周期为当前演示参数，交期天数由业务部门自行维护，系统只做加法。</div>
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone">
+              <div class="phone-screen">
+                <div class="phone-view active" id="quoteView">
+                  <div class="phone-top"><button class="back">‹</button>产品报价</div>
+                  <div class="brand-search"><input placeholder="⌕ 请输入关键词搜索"/><button>搜索</button></div>
+                  <div class="mobile-tabs oem-tabs"><button class="mobile-tab active">OEM报价</button><button class="mobile-tab" data-phone-view="brandAdjustedView">品牌报价</button></div>
+                  <div class="screen-scroll oem-list">
+                    <div class="oem-card">
+                      <div class="oem-title">抗磨液压油 L-HM 68（高清高压）白色 马石油 <span class="oem-color">白色</span></div>
+                      <span class="oem-type">成品油</span>
+                      <div class="oem-meta">开票名称：抗磨液压油<br/><strong>提货地点：肇庆仓库</strong></div>
+                      <div class="tier-price"><div class="tier-row"><span>产品价格（元/吨）</span><strong>¥10,940.00</strong></div><div class="tier-row"><span>当前销售最低可报（元/吨）</span><strong>¥10,721.20</strong></div></div>
+                      <div class="brand-result">可售库存：10吨<br>预计交期：预计3天 · 现货</div>
+                      <div class="oem-card-foot"><span>有效期至：2026-09-30 23:59:59</span><button class="oem-remove" id="toggleOem68">− 撤销</button></div>
+                    </div>
+                    <div class="oem-card">
+                      <div class="oem-title">抗磨液压油 L-HM 46（高清高压）白色 马石油 <span class="oem-color">白色</span></div>
+                      <span class="oem-type">成品油</span>
+                      <div class="oem-meta">开票名称：抗磨液压油<br/><strong>提货地点：肇庆仓库</strong></div>
+                      <div class="tier-price"><div class="tier-row"><span>产品价格（元/吨）</span><strong>¥10,700.63</strong></div><div class="tier-row"><span>当前销售最低可报（元/吨）</span><strong>¥10,486.62</strong></div></div>
+                      <div class="brand-result">可售库存：0吨<br>预计交期：预计8天 · 生产补足</div>
+                      <div class="oem-card-foot"><span>有效期至：2026-09-30 23:59:59</span><button class="oem-add" id="toggleOem46">＋加入意向清单</button></div>
+                    </div>
+                  </div>
+                  <div class="mobile-actions"><button class="primary" id="goCreate">意向产品清单（1）</button></div>
+                </div>
+
+                <div class="phone-view" id="intentListView">
+                  <div class="phone-top"><button class="back" data-phone-view="quoteView">‹</button>意向产品清单</div>
+                  <div class="screen-scroll brand-list" id="intentProductList" style="max-height:604px;padding-top:2px"></div>
+                  <div class="mobile-actions intent-list-actions"><button class="intent-select-all selected" id="selectAllIntent" aria-pressed="true"><span class="intent-select-mark">✓</span><span>全选</span></button><button class="primary intent-order-button" id="goIntentOrder">去下单(3)</button></div>
+                </div>
+
+                <div class="phone-view" id="createView">
+                  <div class="phone-top"><button class="back" data-phone-view="intentListView">‹</button>提交意向单<button class="top-action" data-phone-view="listView">订单</button></div>
+                  <div class="screen-scroll">
+                    <div class="section-title">基本信息</div>
+                    <div class="mobile-card">
+                      <div class="row"><label>客户</label><div class="value">江门市蓝图润滑油有限公司 ›</div></div>
+                      <div class="row"><label>客户要求日期</label><div class="value">2026-09-23</div></div>
+                      <div class="row"><label>系统预计到货</label><div class="value" id="deliveryValue" style="color:var(--green)">预计3天 · 现货</div></div>
+                      <div class="row"><label>包装方式</label><div class="value">桶装 · 公模</div></div>
+                      <div class="row"><label>配送方式</label><div class="value">自提 · 肇庆仓库</div></div>
+                      <div class="row"><label>付款方式</label><div class="value">先款-全款</div></div>
+                    </div>
+                    <div class="section-title">产品明细</div>
+                    <div class="mobile-card">
+                      <div class="product-title"><span>抗磨液压油 L-HM 68<br/>（高清高压）白色 马石油</span><span class="sku-tag">20L/16kg</span></div>
+                      <div class="row"><label>包装数量</label><input id="qty" type="number" min="1" placeholder="请输入包装数量" inputmode="numeric" /></div>
+                      <div class="stock-line" id="stockLine"><span>可售库存 <strong id="stockText">10吨</strong></span></div>
+                      <div class="supply-detail" id="supplyDetail">现货覆盖20桶需求，交期＝发运周期3天。</div>
+                      <div class="row"><label>挂牌单价</label><div class="value">¥175.04/桶</div></div>
+                      <div class="row"><label>我的报价</label><input id="quote" type="number" step="0.01" placeholder="请输入我的报价" inputmode="decimal" aria-describedby="quoteHint" /></div>
+                      <div class="price-hint" id="quoteHint">销售授权2% · 最低可报 ¥171.54/桶</div>
+                      <div class="row"><label for="couponSelect">优惠券</label><select class="coupon-select" id="couponSelect"><option value="0">不使用优惠券</option><option value="50">立减¥50</option><option value="300">运营补贴¥300</option></select></div>
+                    </div>
+                    <div class="section-title">价格明细</div>
+                    <div class="summary">
+                      <div class="sum-row"><span>挂牌总额</span><span id="listTotal">¥3,500.80</span></div>
+                      <div class="sum-row"><span>销售让利</span><span id="salesDiscount">-¥0.00</span></div>
+                      <div class="sum-row"><span>优惠券</span><span id="couponAmount">-¥0.00</span></div>
+                      <div class="sum-row"><span>包材及运费</span><span>¥0.00</span></div>
+                      <div class="sum-row total"><span>客户应付</span><b id="payable">¥3,500.80</b></div>
+                      <div class="subsidy" id="subsidy">优惠券使客户实付低于成本，订单仍可提交，低于成本责任归运营；销售报价本身仍需通过最低可报校验。</div>
+                    </div>
+                    <div class="decision-line" id="decisionLine">可提交意向单 · 预计3天到货 · 客户应付¥3,500.80</div>
+                    <div class="inline-error" id="inlineError"></div>
+                  </div>
+                  <div class="mobile-actions"><button class="secondary" id="saveDraft">仅保存</button><button class="primary" id="submitOrder">提交意向单</button></div>
+                </div>
+
+                <div class="phone-view" id="brandOriginalView">
+                  <div class="phone-top"><button class="back" data-phone-view="quoteView">‹</button>产品报价</div>
+                  <div class="brand-original-label">录屏原页面还原：字段、价格层级和页面结构保持不变</div>
+                  <div class="brand-search"><input placeholder="⌕ 请输入关键词搜索"/><button>搜索</button></div>
+                  <div class="mobile-tabs brand-tabs"><button class="mobile-tab" data-phone-view="quoteView">OEM报价</button><button class="mobile-tab active">品牌报价</button></div>
+                  <div class="screen-scroll brand-list">
+                    <div class="brand-card">
+                      <div class="brand-title">腾原智造 抗磨液压油 L-HM 46（高压）淡黄色 170kg/桶 蓝盖蓝黄蓝桶</div>
+                      <span class="stock-badge">无库存</span><div class="brand-meta">提货地点：肇庆仓库<br/>品牌：腾原智造</div>
+                      <div class="tier-price"><div class="tier-row"><span>销售面价(元/桶)</span><strong>1910</strong></div><div class="tier-row"><span>终端客户折扣价</span><strong>1910</strong></div><div class="tier-row"><span>三级代理折扣价</span><strong>1910</strong></div><div class="tier-row"><span>二级代理折扣价</span><strong>1910</strong></div><div class="tier-row"><span>一级代理折扣价</span><strong>1910</strong></div></div>
+                      <div class="brand-card-foot"><span>有效期至：</span><button class="brand-add disabled">− 撤销</button></div>
+                    </div>
+                    <div class="brand-card">
+                      <div class="brand-title">腾原智造 优选·经典 回转式空气压缩机油 L-DAH 46淡黄色 170kg/桶 浅蓝色</div>
+                      <span class="stock-badge">无库存</span><div class="brand-meta">提货地点：肇庆仓库<br/>品牌：腾原智造 优选·经典</div>
+                      <div class="tier-price"><div class="tier-row"><span>销售面价(元/桶)</span><strong>1980</strong></div><div class="tier-row"><span>终端客户折扣价</span><strong>1980</strong></div><div class="tier-row"><span>三级代理折扣价</span><strong>1980</strong></div><div class="tier-row"><span>二级代理折扣价</span><strong>1980</strong></div><div class="tier-row"><span>一级代理折扣价</span><strong>1980</strong></div></div>
+                      <div class="brand-card-foot"><span>有效期至：</span><button class="brand-add" data-phone-view="brandOriginalSelectView">＋加入意向清单</button></div>
+                    </div>
+                  </div>
+                  <div class="mobile-actions"><button class="secondary">✓ 全选</button><button class="primary" data-phone-view="brandOriginalSelectView">意向清单(2)</button></div>
+                </div>
+
+                <div class="phone-view" id="brandOriginalOrderView">
+                  <div class="phone-top"><button class="back" data-phone-view="brandOriginalSelectView">‹</button>提交意向单</div>
+                  <div class="brand-original-label">录屏原页面还原：先完整保留现有字段，再进行需求调整</div>
+                  <div class="screen-scroll brand-order-scroll">
+                    <div class="brand-form-section"><div class="brand-form-title">基本信息</div><div class="brand-form-row"><span class="required">客户名称</span><span class="brand-value placeholder">请选择客户名称 ›</span></div><div class="brand-form-row"><span class="required">客户要货日期</span><span class="brand-value placeholder">请选择客户要货日期 ›</span></div><div class="brand-form-row"><span class="required">包装方式</span><span class="brand-value">桶装</span></div><div class="brand-form-row"><span class="required">包材来源</span><span class="brand-value">公模（公模公桶公标）</span></div><div class="brand-form-row"><span>对应商机</span><span class="brand-value placeholder">请选择对应商机 ›</span></div></div>
+                    <div class="brand-form-section"><div class="brand-form-title">配送信息</div><div class="brand-form-row"><span>提货地点</span><span class="brand-value">肇庆仓库</span></div><div class="brand-form-row"><span class="required">配送方式</span><span class="brand-value">自提 ›</span></div><div class="brand-form-row"><span>其他备注</span><span class="brand-value placeholder">请输入其他备注</span></div></div>
+                    <div class="brand-form-section"><div class="brand-form-title">付款方式</div><div class="brand-form-row"><span class="required">付款方式</span><span class="brand-value placeholder">请选择付款方式 ›</span></div><div class="brand-form-row"><span>付款备注</span><span></span></div></div>
+                    <div class="brand-form-section"><div class="brand-form-title">产品明细 <span style="float:right;color:#064386;font-size:12px">＋添加产品</span></div>
+                      <div class="brand-product-head"><span>腾原智造 抗磨液压油 L-HM 46（高压）淡黄色 170kg/桶 蓝盖蓝黄蓝桶</span><span class="brand-product-actions">复制 <b>删除</b></span></div><div class="brand-form-row"><span>包装规格</span><span></span></div><div class="brand-form-row"><span class="required">包装数量(桶)</span><span class="brand-value placeholder">请输入包装数量</span></div><div class="brand-form-row"><span class="required">商品单价(元/桶)</span><span class="brand-value">0</span></div><div class="brand-price-hint">账期指导价：</div><div class="brand-form-row"><span class="required">佣金单价(元/吨)</span><span class="brand-value">0</span></div>
+                      <div class="brand-product-head"><span>腾原智造 优选·经典 回转式空气压缩机油 L-DAH 46淡黄色 170kg/桶 浅蓝色</span><span class="brand-product-actions">复制 <b>删除</b></span></div><div class="brand-form-row"><span>包装规格</span><span></span></div><div class="brand-form-row"><span class="required">包装数量(桶)</span><span class="brand-value placeholder">请输入包装数量</span></div><div class="brand-form-row"><span class="required">商品单价(元/桶)</span><span class="brand-value">0</span></div><div class="brand-price-hint">账期指导价：</div><div class="brand-form-row"><span class="required">佣金单价(元/吨)</span><span class="brand-value">0</span></div><div class="brand-form-row"><span>订单备注</span><span></span></div>
+                    </div>
+                    <div class="brand-form-section"><div class="brand-form-title">价格明细</div><div class="brand-form-row"><span>商品总额</span><span class="brand-value">0</span></div><div class="brand-form-row"><span>佣金总计</span><span class="brand-value">0</span></div><div class="brand-form-row"><span>订单总金额(商品+运费)</span><span class="brand-value">0.00</span></div></div>
+                  </div>
+                  <div class="brand-order-footer"><span class="brand-order-total">合计金额：<strong>¥ 0.00</strong></span><button class="secondary">仅保存</button><button class="primary">提交意向单</button></div>
+                </div>
+
+                <div class="phone-view" id="brandAdjustedView">
+                  <div class="phone-top"><button class="back" data-phone-view="quoteView">‹</button>产品报价</div>
+                  <div class="brand-search"><input placeholder="⌕ 请输入关键词搜索"/><button>搜索</button></div>
+                  <div class="mobile-tabs brand-tabs"><button class="mobile-tab" data-phone-view="quoteView">OEM报价</button><button class="mobile-tab active">品牌报价</button></div>
+                  <div class="screen-scroll brand-list">
+                    <div class="brand-card"><div class="brand-title">腾原智造 抗磨液压油 L-HM 46（高压）淡黄色 170kg/桶 蓝盖蓝黄蓝桶</div><span class="stock-badge in-stock">有库存</span><div class="brand-meta">提货地点：肇庆仓库<br/>品牌：腾原智造</div><div class="tier-price"><div class="tier-row"><span>产品价格（元/桶）</span><strong>¥1910</strong></div><div class="tier-row"><span>当前销售最低可报（元/桶）</span><strong>¥1871.80</strong></div></div><div class="brand-result">可售库存：68桶<br>预计交期：预计3天 · 现货</div><div class="brand-card-foot"><span>有效期至：2026-09-30 23:59:59</span><button class="brand-add disabled" id="toggleBrandHydraulic">− 撤销</button></div></div>
+                    <div class="brand-card"><div class="brand-title">腾原智造 优选·经典 回转式空气压缩机油 L-DAH 46淡黄色 170kg/桶 浅蓝色</div><span class="stock-badge out-stock">无库存</span><div class="brand-meta">提货地点：肇庆仓库<br/>品牌：腾原智造 优选·经典</div><div class="tier-price"><div class="tier-row"><span>产品价格（元/桶）</span><strong>¥1980</strong></div><div class="tier-row"><span>当前销售最低可报（元/桶）</span><strong>¥1940.40</strong></div></div><div class="brand-result">可售库存：0桶<br>预计交期：预计8天 · 生产补足</div><div class="brand-card-foot"><span>有效期至：2026-09-30 23:59:59</span><button class="brand-add disabled" id="toggleBrandCompressor">− 撤销</button></div></div>
+                  </div>
+                  <div class="mobile-actions"><button class="primary" id="goBrandIntent">意向产品清单（2）</button></div>
+                </div>
+
+                <div class="phone-view" id="brandAdjustedOrderView">
+                  <div class="phone-top"><button class="back" data-phone-view="intentListView">‹</button>提交意向单</div>
+                  <div class="screen-scroll brand-order-scroll">
+                    <div class="brand-form-section"><div class="brand-form-title">基本信息</div><div class="brand-form-row"><span class="required">客户名称</span><span class="brand-value">江门市蓝图润滑油有限公司 ›</span></div><div class="brand-form-row"><span class="required">客户要货日期</span><span class="brand-value">2026-09-30 ›</span></div><div class="brand-form-row"><span class="required">包装方式</span><span class="brand-value" id="packagingMethodText">桶装 ›</span></div><div class="brand-form-row"><span class="required">包材来源</span><button class="package-source-trigger" id="packageSource" type="button" data-value="public" aria-haspopup="dialog" aria-controls="packageSourceSheet" aria-expanded="false"><span id="packageSourceText">公模（公模公桶公标）</span><span class="chevron">&gt;</span></button><span class="brand-value" id="packageSourceReadonly" hidden>公模（公模公桶公标）</span></div><div class="brand-form-row"><span>对应商机</span><span class="brand-value placeholder">请选择对应商机 ›</span></div><div class="brand-form-row package-extra-row" id="customerPackagingDaysRow"><span class="required">客供包材到货天数</span><input id="customerPackagingDays" type="number" min="1" placeholder="请输入到货天数" inputmode="numeric"/></div><div class="brand-form-row package-extra-row" id="customerLabelDaysRow"><span class="required">客供标签到货天数</span><input id="customerLabelDays" type="number" min="1" placeholder="请输入到货天数" inputmode="numeric"/></div></div>
+                    <div class="brand-form-section"><div class="brand-form-title">配送信息</div><div class="brand-form-row"><span>提货地点</span><span class="brand-value">肇庆仓库</span></div><div class="brand-form-row"><span class="required">配送方式</span><button class="delivery-method-trigger" id="deliveryMethod" type="button" data-value="pickup" aria-haspopup="dialog" aria-controls="deliveryMethodSheet" aria-expanded="false"><span id="deliveryMethodText">自提</span><span class="chevron">&gt;</span></button></div><div class="brand-form-row" id="deliveryAddressRow" style="display:none"><span class="required">配送地址</span><div class="select-entry"><select id="deliveryAddress" aria-label="配送地址"><option value="">请选择配送地址</option><option value="jiangmen">江门市蓬江区默认收货地址</option></select><span class="chevron">&gt;</span></div></div><div class="brand-form-row"><span>其他备注</span><span class="brand-value placeholder">请输入其他备注</span></div></div>
+                    <div class="brand-form-section"><div class="brand-form-title">付款方式</div><div class="brand-form-row"><span class="required">付款方式</span><span class="brand-value">先款-全款 ›</span></div><div class="brand-form-row"><span>付款备注</span><span class="brand-value">款到自提-全款</span></div></div>
+                    <div class="brand-form-section"><div class="brand-form-title">产品明细 <span style="float:right;color:#064386;font-size:12px">＋添加产品</span></div><div id="intentOrderProducts"></div><div class="brand-form-row"><span>订单备注</span><span></span></div></div>
+                    <div class="brand-form-section" id="freightFields" style="display:none"><div class="brand-form-row"><span class="required">运费（元/吨）</span><span class="brand-value" id="freightQuote">选择配送地址后自动带出</span></div><div class="brand-price-hint" id="freightHint">来源：后台附加项；系统按订单吨数自动计算，不支持手工录入。</div></div>
+                    <div class="brand-form-section"><div class="brand-form-title">优惠与价格明细</div><div class="brand-form-row" id="intentFreightTotalRow" style="display:none"><span>运费总额</span><span class="brand-value" id="intentFreightTotal">待确认</span></div><div class="brand-form-row"><span>商品总额</span><span class="brand-value" id="intentListTotal">¥42,400.80</span></div><div class="brand-form-row"><span>销售让利</span><span class="brand-value" id="intentSalesDiscount">-¥0.00</span></div><div class="brand-form-row"><span>优惠券抵扣</span><span class="brand-value" id="intentCouponAmount">-¥0.00</span></div><div class="brand-form-row"><span>客户应付</span><strong class="brand-value" id="intentPayable" style="color:var(--red)">¥42,400.80</strong></div><span id="intentOrderDecision" hidden>可提交意向单 · 3款商品预计8天到货 · 报价校验通过</span></div>
+                  </div>
+                  <div class="brand-order-footer"><span class="brand-order-total">合计金额：<strong id="intentFooterTotal">¥42,400.80</strong></span><button class="secondary">仅保存</button><button class="primary" id="brandSubmitOrder">提交意向单</button></div>
+                </div>
+
+                <div class="phone-view" id="listView">
+                  <div class="phone-top"><button class="back" data-phone-view="quoteView">‹</button>销售订单</div>
+                  <div class="order-search"><button class="filter-control">筛选　▽</button><span class="search-divider"></span><input class="search-input" placeholder="⌕ 请输入关键词搜索"/><button class="search-button">搜索</button></div>
+                  <div class="mobile-tabs"><button class="mobile-tab active">意向单</button><button class="mobile-tab" data-phone-view="formalView">正式订单</button><button class="mobile-tab">已完结</button><button class="mobile-tab">已取消</button><button class="mobile-tab">全部</button></div>
+                  <div class="screen-scroll order-list-scroll">
+                    <div class="order-card" id="openIntent" role="button" tabindex="0">
+                      <div class="order-head"><span>订单号：YO20260920003</span><div class="order-tags"><span class="mini-tag">意向单</span><span class="mini-tag blue" id="listStatusTag">待提交</span></div></div>
+                      <div class="order-meta-line">订单类型：OEM订单</div>
+                      <div class="order-meta-line">销售&amp;客服：谭新飞　谢子燕</div>
+                      <div class="order-meta-line">下单客户：江门市蓝图润滑油有限公司</div>
+                      <div class="order-product"><div class="order-product-title"><span>抗磨液压油 L-HM 68（高清高压）白色 马石油</span><span>¥175.04</span></div><div class="order-product-row"><span>包装规格：20/16</span><span>X 20桶</span></div><div class="order-product-row"><span>开票名称：抗磨液压油</span></div></div>
+                      <div class="order-business-line"><div class="order-business-tags"><span class="outline-tag">桶装</span><span class="outline-tag">自提</span><span class="outline-tag">先款-全款</span></div><strong class="required-date">要货日期：2026-09-23</strong></div>
+                      <div class="order-bottom-line"><span>下单时间：2026-09-20 17:30:36</span><span class="order-amount">订单总金额 <strong id="listOrderAmount">¥ 4,500.80</strong></span></div>
+                      <div class="countdown" id="listCountdown">库存已预占 · 剩余23:59:59</div>
+                    </div>
+                    <div class="order-card">
+                      <div class="order-head"><span>订单号：YO20260920002</span><div class="order-tags"><span class="mini-tag">意向单</span><span class="mini-tag blue">待提交</span></div></div>
+                      <div class="order-meta-line">订单类型：OEM订单</div>
+                      <div class="order-meta-line">销售&amp;客服：谭新飞　谢子燕</div>
+                      <div class="order-meta-line">下单客户：江门市蓝图润滑油有限公司</div>
+                      <div class="order-product"><div class="order-product-title"><span>抗磨液压油 L-HM 68（高清高压）白色 马石油</span><span>¥175.04</span></div><div class="order-product-row"><span>包装规格：20/16</span><span>X 20桶</span></div><div class="order-product-row"><span>开票名称：抗磨液压油</span></div></div>
+                      <div class="order-business-line"><div class="order-business-tags"><span class="outline-tag">桶装</span><span class="outline-tag">自提</span><span class="outline-tag">先款-全款</span></div><strong class="required-date">要货日期：2026-09-23</strong></div>
+                      <div class="order-bottom-line"><span>下单时间：2026-09-20 17:30:34</span><span class="order-amount">订单总金额 <strong>¥ 3500.8</strong></span></div>
+                      <div class="countdown">库存已预占 · 剩余23:42:18</div>
+                    </div>
+                    <div class="order-card">
+                      <div class="order-head"><span>订单号：YO20260920001</span><div class="order-tags"><span class="mini-tag">意向单</span><span class="mini-tag blue">待提交</span></div></div>
+                      <div class="order-meta-line">订单类型：OEM订单</div>
+                      <div class="order-meta-line">销售&amp;客服：谭新飞　谢子燕</div>
+                      <div class="order-meta-line">下单客户：江门市蓝图润滑油有限公司</div>
+                      <div class="order-product"><div class="order-product-title"><span>抗磨液压油 L-HM 68（高清高压）白色 马石油</span><span>¥175.04</span></div><div class="order-product-row"><span>包装规格：20/16</span><span>X 20桶</span></div><div class="order-product-row"><span>开票名称：抗磨液压油</span></div></div>
+                      <div class="order-business-line"><div class="order-business-tags"><span class="outline-tag">桶装</span><span class="outline-tag">自提</span><span class="outline-tag">先款-全款</span></div><strong class="required-date">要货日期：2026-09-23</strong></div>
+                      <div class="order-bottom-line"><span>下单时间：2026-09-20 17:30:31</span><span class="order-amount">订单总金额 <strong>¥ 3500.8</strong></span></div>
+                      <div class="countdown">库存已预占 · 剩余23:18:06</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="phone-view" id="intentView">
+                  <div class="phone-top"><button class="back" data-phone-view="listView">‹</button>意向单详情</div>
+                  <div class="detail-summary">
+                    <div class="detail-summary-row"><span>订单号：</span><strong>YO20260920003</strong><span class="detail-status">待提交</span></div>
+                    <div class="detail-summary-row"><span>订单类型：</span><strong>OEM订单</strong></div>
+                    <div class="detail-summary-row"><span>销售&amp;客服：</span><strong>谭新飞　谢子燕</strong></div>
+                    <div class="detail-summary-row"><span>下单客户：</span><strong>江门市蓝图润滑油有限公司</strong></div>
+                    <div class="detail-summary-row"><span>提货地点：</span><strong>肇庆仓库</strong></div>
+                  </div>
+                  <div class="mobile-tabs detail-tabs"><button class="mobile-tab active">订单信息</button></div>
+                  <div class="screen-scroll detail-content">
+                    <div class="detail-section-title">基本信息</div>
+                    <div class="detail-field"><span>包装方式</span><strong>桶装</strong></div>
+                    <div class="detail-field"><span>包材来源</span><strong id="detailPackageSource">公模（公模公桶公标）</strong></div>
+                    <div class="detail-field"><span>要货日期</span><strong>2026-09-23</strong></div>
+                    <div class="detail-field"><span id="detailEtaLabel">预计交期</span><strong id="detailEta">预计3天 · 现货</strong></div>
+                    <div class="detail-field"><span>配送方式</span><strong id="detailDeliveryMethod">自提</strong></div>
+                    <div class="detail-field" id="detailDeliveryAddressRow" style="display:none"><span>配送地址</span><strong>江门市蓬江区默认收货地址</strong></div>
+                    <div class="detail-field"><span>提货地点</span><strong>肇庆仓库</strong></div>
+                    <div class="detail-field"><span>其他备注</span><strong>-</strong></div>
+                    <div class="detail-field"><span>付款方式</span><strong>先款-全款</strong></div>
+                    <div class="detail-field"><span>付款备注</span><strong>款到自提-全款</strong></div>
+                    <div class="detail-field"><span>下单时间</span><strong>2026-09-20 17:30:31</strong></div>
+                    <div id="detailProducts"><div class="detail-product-section-head"><span>产品明细</span><span>共1项</span></div>
+                    <div class="detail-product-name">抗磨液压油 L-HM 68（高清高压）白色 马石油</div>
+                    <div class="detail-field"><span>包装规格</span><strong>20L/16kg</strong></div>
+                    <div class="detail-field"><span>包装颜色</span><strong>白色</strong></div>
+                    <div class="detail-field"><span>容积</span><strong>20</strong></div>
+                    <div class="detail-field"><span>重量(kg)</span><strong>16</strong></div>
+                    <div class="detail-field"><span>包装数量(桶)</span><strong id="detailQuantity">20</strong></div>
+                    <div class="detail-field"><span>产品单价(元/桶)</span><strong id="detailProductPrice">175.04</strong></div>
+                    <div class="detail-field"><span>我的报价(元/桶)</span><strong id="detailMyQuote">175.04</strong></div>
+                    <div class="detail-field"><span>当前销售最低可报</span><strong id="detailFloorPrice" style="color:var(--blue)">¥171.54/桶</strong></div>
+                    <div class="detail-field"><span>包材单价(元/桶)</span><strong id="detailPackagingPrice">50.00</strong></div>
+                    <div class="detail-field"><span>佣金单价(元/吨)</span><strong id="detailCommission">0.00</strong></div>
+                    <div class="detail-field"><span>运费单价(元/桶)</span><strong id="detailFreightUnitPrice">0.00</strong></div>
+                    <div class="detail-field"><span>交易单价(元/桶)</span><strong id="detailTransactionPrice">225.04</strong></div>
+                    <div class="detail-field"><span>小计(元)</span><strong id="detailSubtotal">4500.80</strong></div>
+                    </div>
+                    <div class="detail-field"><span>订单备注</span><span></span></div>
+                    <div class="detail-spacer"></div>
+                  </div>
+                  <div class="detail-totals"><div><p>商品总额：<span id="detailProductTotal">¥3,500.80</span></p><p>优惠券：<span id="detailCouponTotal">-¥0.00</span></p><span id="detailPackagingTotal" hidden>¥1,000.00</span></div><div class="detail-total-amount"><p>运费：<span id="detailFreightTotal">¥0.00</span></p><p>订单总金额：<strong id="detailOrderTotal">¥4,500.80</strong></p></div></div>
+                  <div class="mobile-actions detail-actions"><button class="danger" id="cancelIntent">取消</button><button class="primary" id="convertOrder">转正式订单</button><button class="primary" id="editIntent">编辑订单</button></div>
+                </div>
+
+                <div class="phone-view" id="formalView">
+                  <div class="phone-top"><button class="back" data-phone-view="listView">‹</button>订单详情</div>
+                  <div class="detail-summary">
+                    <div class="detail-summary-row"><span>订单号：</span><strong>YO20260921001</strong></div>
+                    <div class="detail-summary-row"><span>订单类型：</span><strong>OEM订单</strong></div>
+                    <div class="detail-summary-row"><span>销售&amp;客服：</span><strong>谭新飞　谢子燕</strong></div>
+                    <div class="detail-summary-row"><span>下单客户：</span><strong>江门市蓝图润滑油有限公司</strong></div>
+                    <div class="detail-summary-row"><span>提货地点：</span><strong>肇庆仓库</strong></div>
+                  </div>
+                  <div class="mobile-tabs detail-tabs"><button class="mobile-tab active">订单信息</button><button class="mobile-tab">合同信息</button><button class="mobile-tab">出库信息</button></div>
+                  <div class="screen-scroll detail-content">
+                    <div class="detail-section-title">基本信息</div>
+                    <div class="detail-field"><span>包装方式</span><strong>桶装</strong></div>
+                    <div class="detail-field"><span>包材来源</span><strong id="formalPackageSource">公模（公模公桶公标）</strong></div>
+                    <div class="detail-field"><span>要货日期</span><strong>2026-09-23</strong></div>
+                    <div class="detail-field"><span id="formalEtaLabel">预计交期</span><strong id="formalEta">预计3天 · 现货</strong></div>
+                    <div class="detail-field"><span>配送方式</span><strong id="formalDeliveryMethod">自提</strong></div>
+                    <div class="detail-field" id="formalDeliveryAddressRow" style="display:none"><span>配送地址</span><strong>江门市蓬江区默认收货地址</strong></div>
+                    <div class="detail-field"><span>提货地点</span><strong>肇庆仓库</strong></div>
+                    <div class="detail-field"><span>其他备注</span><strong>-</strong></div>
+                    <div class="detail-field"><span>付款方式</span><strong>先款-全款</strong></div>
+                    <div class="detail-field"><span>付款备注</span><strong>款到自提-全款</strong></div>
+                    <div class="detail-field"><span>下单时间</span><strong>2026-09-21 23:28:34</strong></div>
+                    <div id="formalProducts"><div class="detail-product-section-head"><span>产品明细</span><span>共1项</span></div>
+                    <div class="detail-product-name">抗磨液压油 L-HM 68（高清高压）白色 马石油</div>
+                    <div class="detail-field"><span>包装规格</span><strong>20L/16kg</strong></div>
+                    <div class="detail-field"><span>包装颜色</span><strong>白色</strong></div>
+                    <div class="detail-field"><span>容积</span><strong>20</strong></div>
+                    <div class="detail-field"><span>重量(kg)</span><strong>16</strong></div>
+                    <div class="detail-field"><span>包装数量(桶)</span><strong id="formalQuantity">20</strong></div>
+                    <div class="detail-field"><span>产品单价(元/桶)</span><strong id="formalProductPrice">175.04</strong></div>
+                    <div class="detail-field"><span>我的报价(元/桶)</span><strong id="formalMyQuote">175.04</strong></div>
+                    <div class="detail-field"><span>当前销售最低可报</span><strong id="formalFloorPrice" style="color:var(--blue)">¥171.54/桶</strong></div>
+                    <div class="detail-field"><span>包材单价(元/桶)</span><strong id="formalPackagingPrice">50.00</strong></div>
+                    <div class="detail-field"><span>佣金单价(元/吨)</span><strong id="formalCommission">0.00</strong></div>
+                    <div class="detail-field"><span>运费单价(元/桶)</span><strong id="formalFreightUnitPrice">0.00</strong></div>
+                    <div class="detail-field"><span>交易单价(元/桶)</span><strong id="formalTransactionPrice">225.04</strong></div>
+                    <div class="detail-field"><span>小计(元)</span><strong id="formalSubtotal">4500.80</strong></div>
+                    </div>
+                    <div class="detail-field"><span>订单备注</span><span></span></div>
+                    <div class="detail-spacer"></div>
+                    <span id="formalStockStatus" hidden>正式占用20桶</span>
+                  </div>
+                  <div class="detail-totals"><div><p>商品总额：<span id="formalProductTotal">¥3,500.80</span></p><p>优惠券：<span id="formalCouponTotal">-¥0.00</span></p><span id="formalPackagingTotal" hidden>¥1,000.00</span></div><div class="detail-total-amount"><p>运费：<span id="formalFreightTotal">¥0.00</span></p><p>订单总金额：<strong id="formalOrderTotal">¥4,500.80</strong></p></div></div>
+                </div>
+                <div class="phone-action-mask" id="packageSourceSheet" aria-hidden="true"><div class="phone-action-sheet" role="dialog" aria-modal="true" aria-labelledby="packageSourceSheetTitle"><div class="picker-head"><button class="picker-cancel" id="cancelPackageSource" type="button">取消</button><strong id="packageSourceSheetTitle">请选择</strong><button class="picker-confirm" id="confirmPackageSource" type="button">确认</button></div><div class="picker-body"><button class="phone-action-option selected" type="button" data-package-option="public" aria-pressed="true">公模（公模公桶公标）</button><button class="phone-action-option" type="button" data-package-option="custom" aria-pressed="false">定制化（定制化桶或标签）</button><button class="phone-action-option" type="button" data-package-option="customer" aria-pressed="false">客供包材（客供桶及标签）</button></div></div></div>
+                <div class="phone-action-mask" id="deliveryMethodSheet" aria-hidden="true"><div class="phone-action-sheet" role="dialog" aria-modal="true" aria-labelledby="deliveryMethodSheetTitle"><div class="picker-head"><button class="picker-cancel" id="cancelDeliveryMethod" type="button">取消</button><strong id="deliveryMethodSheetTitle">请选择</strong><button class="picker-confirm" id="confirmDeliveryMethod" type="button">确认</button></div><div class="picker-body"><button class="phone-action-option" type="button" data-delivery-option="delivery" aria-pressed="false">配送</button><button class="phone-action-option selected" type="button" data-delivery-option="pickup" aria-pressed="true">自提</button></div></div></div>
+                <div class="toast" id="toast">已保存</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer-head"><h2 id="drawerTitle">新增折扣权限</h2><button class="close" id="closeDrawer" aria-label="关闭">×</button></div>
+      <div class="drawer-body">
+        <div class="form-grid">
+          <div class="field full"><label for="ruleName">规则名称</label><input class="input" id="ruleName" value="华东大区默认权限" /></div>
+          <div class="field"><label for="targetType">授权对象</label><select class="select" id="targetType"><option>大区</option><option>销售个人</option><option>运营</option></select></div>
+          <div class="field"><label for="targetName">选择对象</label><select class="select" id="targetName"><option>华东大区</option><option>华南大区</option><option>销售-张销售</option><option>运营-谢云</option></select></div>
+          <div class="field full"><label>让利方式</label><div class="radio-row"><button class="choice active" type="button" data-discount-type="percent">按百分比</button><button class="choice" type="button" data-discount-type="fixed">固定金额</button></div></div>
+          <div class="field"><label for="discountValue">最大让利值</label><input class="input" id="discountValue" type="number" value="2" /><small id="discountHelp">填写让利百分比，例如2表示2%</small></div>
+          <div class="field"><label for="singleCap">单笔金额上限（选填）</label><input class="input" id="singleCap" type="number" placeholder="不限" /><small>比例让利时可限制单笔最多让利金额</small></div>
+          <div class="field"><label for="startDate">生效日期</label><input class="input" id="startDate" type="date" value="2026-09-20" /></div>
+          <div class="field"><label for="endDate">失效日期</label><input class="input" id="endDate" type="date" value="2026-12-31" /></div>
+          <div class="field"><label for="ruleStatus">状态</label><select class="select" id="ruleStatus"><option>启用</option><option>停用</option></select></div>
+          <div class="field full"><label for="remark">备注</label><textarea id="remark" placeholder="说明适用场景，不作为系统判断条件"></textarea></div>
+        </div>
+      </div>
+      <div class="drawer-foot"><button class="ghost" id="cancelDrawer">取消</button><button class="primary" id="saveRule">保存权限</button></div>
+    </aside>
+  </div>
+
+  <dialog class="mobile-requirements-dialog" id="mobileRequirementsDialog" aria-labelledby="mobileRequirementsTitle">
+    <header class="mobile-requirements-header"><h2 id="mobileRequirementsTitle">销售小程序 · 需求说明</h2><form method="dialog"><button class="close" aria-label="关闭需求说明">×</button></form></header>
+    <div class="mobile-requirements-body" id="mobileRequirementsBody" tabindex="0">
+      <section><h3>一、调整范围与规则来源</h3><p>本次调整覆盖：产品报价、意向产品清单、提交意向单、意向单列表、意向单详情及正式订单详情。</p><p>销售折扣配置及匹配规则沿用《销售折扣管理需求说明》。本次未涉及的原有字段与功能保持原逻辑。</p></section>
+      <section><h3>二、填写校验与优惠处理</h3><ul>
+        <li><strong>商品总额：</strong>商品总额＝指导价 × 数量；多商品分别计算后求和。</li>
+        <li><strong>包材单价：</strong>品牌报价及 OEM 报价选择公模时，删除包材单价字段。</li>
+        <li><strong>当前销售最低可报：</strong>根据商品挂牌价及适用的销售折扣规则计算；计算结果低于商品成本价时，取商品成本价。</li>
+        <li><strong>我的报价：</strong>必填、大于0，最多两位小数，不得低于当前销售最低可报。</li>
+        <li><strong>我的报价低于最低可报：</strong>对应商品显示最低可报价格和错误原因，阻止提交。</li>
+        <li><strong>我的报价为空、无效或超过两位小数：</strong>对应商品提示“请填写有效报价”，阻止提交。</li>
+        <li><strong>包装数量：</strong>桶装数量为大于0的整数；数量无效时，对应商品提示填写有效数量，阻止提交。</li>
+        <li><strong>我的报价高于产品单价：</strong>允许提高报价；禁用优惠券，已选优惠券清零，不产生销售让利。</li>
+        <li><strong>销售折扣叠加优惠券后低于成本：</strong>先校验我的报价符合销售权限，再抵扣优惠券；券后低于成本不拦截、不进入OA审批，由运营担责。</li>
+        <li><strong>所需交期参数缺失：</strong>显示“交期待确认”；其他校验通过后允许提交，由业务后续确认。</li>
+      </ul><p>优惠券抵扣不计入销售自主让利。销售权限校验以用券前的“我的报价”为准。</p></section>
+      <section><h3>三、预计交期计算</h3><p>可售库存仅展示当前可售数量及单位。报价页、意向产品清单和下单页的供货状态统一展示在预计交期后，格式为“预计X天 · 现货／生产补足”；无法确定时显示“交期待确认”。意向单详情和正式订单详情：单商品展示“预计X天 · 供货状态”或“交期待确认”；多商品逐项展示各商品交期和供货状态，整单总预计交期仅展示“预计X天”或“交期待确认”。</p><p>交期天数由业务部门维护，系统按所需环节相加。</p><ul>
+        <li><strong>库存能够覆盖需求：</strong>商品需求数量 ≤ 可售库存，且发运周期已维护。按发运周期计算，展示“预计X天 · 现货”。</li>
+        <li><strong>库存不足，生产补足：</strong>商品需求数量 > 可售库存，且生产周期、发运周期均已维护。按生产周期＋发运周期计算，展示“预计X天 · 生产补足”。</li>
+        <li><strong>所需周期未维护：</strong>库存充足但发运周期未维护；或库存不足且生产周期、发运周期任一未维护。展示“交期待确认”，由业务后续确认。</li>
+        <li><strong>判断口径：</strong>需求数量与可售库存统一单位后比较，按每款商品分别判断。</li>
+        <li><strong>提交前提：</strong>上述情况均可提交，以报价、数量、配送等其他校验通过为前提，交期待确认不阻断提交。</li>
+        <li><strong>多商品订单：</strong>取各商品最长预计交期；任一商品交期待确认，整单显示“交期待确认”。</li>
+      </ul><p>原型展示的让利比例、成本价及周期天数为演示数据，实际取后台配置和对应商品数据。</p></section>
+      <section><h3>四、提交结果与库存预占</h3><p>报价、数量及配送等校验通过后，提交生成意向单，开始24小时库存预占。规则内订单不再逐单进入OA审批。</p><ul>
+        <li><strong>编辑意向单：</strong>不重置或延长预占时间。</li>
+        <li><strong>超过24小时仍未转正式订单：</strong>自动释放预占库存，订单状态变为“已取消”。</li>
+        <li><strong>主动取消意向单：</strong>释放本单预占库存，订单状态变为“已取消”。</li>
+        <li><strong>转正式订单：</strong>无需OA审批；保留原意向单的商品及成交信息，预占库存转为正式占用。订单进入正式订单列表，停止意向单预占倒计时。</li>
+      </ul></section>
+      <section><h3>五、订单编辑与后续处理</h3><ul>
+        <li><strong>编辑订单：</strong>带回原订单填写内容；修改报价、数量等信息时执行相应填写校验；不延长预占时间。</li>
+        <li><strong>交期待确认的意向单：</strong>允许转正式订单，转单后继续显示“交期待确认”。</li>
+        <li><strong>正式订单：</strong>不再受意向单24小时预占到期影响，后续付款、履约等沿用原有流程。</li>
+      </ul></section>
+    </div>
+    <form method="dialog" class="mobile-requirements-footer"><button class="primary">关闭</button></form>
+  </dialog>
+
+  <div class="success-modal" id="successModal">
+    <div class="success-card"><div class="success-icon" id="successIcon">✓</div><h2 id="successTitle">意向单已提交</h2><p id="successText">已预占20桶库存，有效期24小时。请在有效期内转为正式订单。</p><div class="modal-actions"><button class="secondary" id="releaseReservation">模拟到期释放</button><button class="primary" id="confirmOrder">查看意向单</button></div><button class="ghost" id="closeSuccess" style="margin-top:10px">关闭</button></div>
+  </div>
+  <script src="./sales-core.js?v=b27159ecce8c"></script>
+  <script>
+    const state={discountType:'percent',coupon:0,intentCoupon:0,scenario:'spot',scenarioPreview:false,supplyMode:'spot',phoneView:'quoteView',orderStatus:'draft',editing:null,packageSource:'public',intentEntry:'oem',orderEntry:'oem',oemIntent:['hm68'],brandIntent:[],intentChecked:['oem:hm68'],rules:[
+      {name:'华南大区默认权限',type:'大区',target:'华南大区',mode:'按百分比',value:'2%',cap:'¥20,000',date:'2026-09-20 至 2026-12-31',status:'启用'},
+      {name:'销售-张销售临时权限',type:'销售个人',target:'张销售',mode:'按百分比',value:'3%',cap:'¥30,000',date:'2026-09-20 至 2026-09-27',status:'启用'},
+      {name:'运营例外处理权限',type:'运营',target:'运营-谢云',mode:'固定金额',value:'¥5,000',cap:'—',date:'2026-09-20 至 2026-12-31',status:'启用'}
+    ]};
+    const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
+    const pageChanges={
+      quoteView:{title:'① 产品报价 · 改动点',items:[
+        '产品价格：展示对应商品的挂牌价。',
+        '当前销售最低可报：根据商品挂牌价及当前销售人员适用的销售折扣规则计算；计算结果低于商品成本价时，取商品成本价，只读展示。',
+        '可售库存：仅展示当前可售数量及单位。',
+        '预计交期：展示“预计X天 · 现货／生产补足”；缺少所需周期参数时显示“交期待确认”。',
+        'OEM原价格字段：删除通用区域价格、终端客户指定区域价格等原有多层价格展示。',
+        '品牌原价格字段：删除销售面价、终端客户折扣价及一／二／三级代理折扣价。'
+      ]},
+      intentListView:{title:'② 意向产品清单 · 改动点',items:[
+        '同步报价页新增、删除的字段。',
+        '每款商品展示产品价格、当前销售最低可报、可售库存及预计交期。',
+        '原有选中、取消选择和继续选品操作保持原逻辑。'
+      ]},
+      brandAdjustedOrderView:{title:'③ 提交意向单 · 改动点',items:[
+        '产品单价：从报价页带入，只读。',
+        '商品总额：商品总额＝指导价 × 数量；多商品分别计算后求和。',
+        '包材单价：品牌报价及 OEM 报价选择公模时，删除包材单价字段。',
+        '我的报价：由销售填写，必填；填写校验见“需求说明”。',
+        '当前销售最低可报：根据商品挂牌价及适用的销售折扣规则计算；计算结果低于商品成本价时，取商品成本价。只读，展示在对应商品报价附近。',
+        '优惠券：选择入口放在佣金单价下方，关联后台优惠券管理。',
+        '可售库存：系统带入，仅展示当前可售数量及单位，只读。',
+        '商品预计交期：每款商品分别展示预计天数及供货状态，无法确定时显示“交期待确认”，只读；问号提示“实际交期以现场生产为主”。',
+        '总预计交期：多商品时展示整单最长交期；任一商品交期待确认，整单显示“交期待确认”。单商品不重复展示。',
+      ]},
+      listView:{title:'④ 意向单列表 · 改动点',items:[
+        '在订单卡片展示“库存已预占”及剩余时间，格式为HH:MM:SS。',
+        '主动取消或预占到期后，订单状态展示为“已取消”。',
+      ]},
+      intentView:{title:'⑤ 意向单详情 · 改动点',items:[
+        '整单汇总信息保持原样，新增展示预计交期。',
+        '单商品展示预计天数及供货状态；多商品逐项展示各商品交期及状态，整单总预计交期仅展示天数；无法确定时显示“交期待确认”。',
+        '删除审批流程页签。',
+        '操作调整为“转正式订单”，保留原意向单的商品及成交信息；转单及库存处理见“需求说明”。'
+      ]},
+      formalView:{title:'⑥ 正式订单详情 · 改动点',items:[
+        '承接意向单的商品、数量、成交价格、配送、优惠及金额信息。',
+        '展示商品预计交期及供货状态；多商品逐项展示，整单总预计交期仅展示天数；无法确定时显示“交期待确认”。',
+        '删除审批流程页签。'
+      ]}
+    };
+    $('#mobileRequirements').onclick=()=>{const dialog=$('#mobileRequirementsDialog');if(!dialog.open)dialog.showModal();$('#mobileRequirementsBody').scrollTop=0};
+    $('#mobileRequirementsDialog').addEventListener('click',event=>{const dialog=event.currentTarget;if(event.target!==dialog)return;const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dialog.close()});
+    function money(n){return '¥'+Number(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})}
+    function showToast(text){const t=$('#toast');t.textContent=text;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+    function renderPageChanges(id){const key=id==='brandAdjustedView'?'quoteView':id==='createView'?'brandAdjustedOrderView':id;const content=pageChanges[key]||pageChanges.quoteView;$('#pageChangeSummary').hidden=!content.items.length;$('#pageChangeTitle').textContent=content.title;$('#pageChangeList').innerHTML=content.items.map(item=>`<li>${item}</li>`).join('')}
+    function switchPhoneView(id){closeDeliveryMethodSheet(false);closePackageSourceSheet(false);state.phoneView=id;$$('.phone-view').forEach(v=>v.classList.toggle('active',v.id===id));const flowView=id==='brandAdjustedView'?'quoteView':id==='createView'?'brandAdjustedOrderView':id;$('#phoneViewSelect').value=flowView;renderPageChanges(flowView);if(id==='createView')updateQuote();if(id==='brandAdjustedOrderView')renderIntentOrder()}
+    $$('[data-phone-view]').forEach(b=>b.onclick=()=>switchPhoneView(b.dataset.phoneView));
+    $('#phoneViewSelect').onchange=e=>switchPhoneView(e.target.value);
+    function renderRules(){
+      $('#ruleRows').innerHTML=state.rules.map((r,i)=>`<tr><td><strong>${r.name}</strong><span class="meta">${r.type}</span></td><td>${r.target}</td><td>${r.mode}</td><td><strong>${r.value}</strong></td><td>${r.cap}</td><td>${r.date}</td><td><span class="status ${r.status==='停用'?'off':''}">${r.status}</span></td><td><button class="link-btn edit-rule" data-index="${i}">编辑</button></td></tr>`).join('');
+      $$('.edit-rule').forEach(b=>b.onclick=()=>openDrawer(Number(b.dataset.index)));
+    }
+    function switchPage(id){document.body.classList.toggle('mobile-mode',id==='mobile');document.body.classList.toggle('pc-mode',id==='pc');$$('.page').forEach(p=>p.classList.toggle('active',p.id===id));$$('.view-tab').forEach(t=>t.classList.toggle('active',t.dataset.page===id));if(id==='mobile') updateQuote()}
+    $$('.view-tab').forEach(t=>t.onclick=()=>switchPage(t.dataset.page));
+    function openDrawer(index=null){state.editing=index;$('#drawerTitle').textContent=index===null?'新增折扣权限':'编辑折扣权限';if(index!==null){const r=state.rules[index];$('#ruleName').value=r.name;$('#targetType').value=r.type;$('#targetName').innerHTML=`<option>${r.target}</option><option>华南大区</option><option>华东大区</option><option>销售-张销售</option><option>运营-谢云</option>`;$('#discountValue').value=parseFloat(r.value)||2;$('#ruleStatus').value=r.status}else{$('#ruleName').value='华东大区默认权限';$('#targetType').value='大区';$('#discountValue').value=2;$('#ruleStatus').value='启用'}$('#drawerBackdrop').classList.add('open');$('#drawerBackdrop').setAttribute('aria-hidden','false')}
+    function closeDrawer(){$('#drawerBackdrop').classList.remove('open');$('#drawerBackdrop').setAttribute('aria-hidden','true')}
+    $('#addRule').onclick=()=>openDrawer();$('#closeDrawer').onclick=closeDrawer;$('#cancelDrawer').onclick=closeDrawer;$('#drawerBackdrop').onclick=e=>{if(e.target.id==='drawerBackdrop')closeDrawer()};
+    $$('.choice').forEach(c=>c.onclick=()=>{state.discountType=c.dataset.discountType;$$('.choice').forEach(x=>x.classList.toggle('active',x===c));$('#discountHelp').textContent=state.discountType==='percent'?'填写让利百分比，例如2表示2%':'填写单笔最大让利金额';$('#singleCap').disabled=state.discountType==='fixed'});
+    $('#saveRule').onclick=()=>{const val=Number($('#discountValue').value||0);const r={name:$('#ruleName').value||'未命名权限',type:$('#targetType').value,target:$('#targetName').value,mode:state.discountType==='percent'?'按百分比':'固定金额',value:state.discountType==='percent'?val+'%':'¥'+val.toLocaleString(),cap:$('#singleCap').value?'¥'+Number($('#singleCap').value).toLocaleString():'—',date:$('#startDate').value+' 至 '+$('#endDate').value,status:$('#ruleStatus').value};if(state.editing===null)state.rules.unshift(r);else state.rules[state.editing]=r;renderRules();$('#auditRows').insertAdjacentHTML('afterbegin',`<div class="audit-row"><span>刚刚</span><span><strong>${r.name}</strong>：${state.editing===null?'新增权限':'修改权限配置'}</span><span>操作人：当前用户</span></div>`);closeDrawer();showToast('权限已保存，报价端实时生效')};
+    const LIST=175.04,COST=165,PERMISSION=.02,OEM_STOCK_TONS=10,OEM_WEIGHT_KG=16;
+    const scenarios={
+      spot:{qty:20,quote:175.04,coupon:0,supply:'spot',summary:'<strong>现货充足：</strong>库存覆盖需求，交期只计算发运周期；报价校验通过后可预占24小时。'},
+      production:{qty:700,quote:175.04,coupon:0,supply:'production',summary:'<strong>生产补足：</strong>需求11.2吨，先使用10吨现货，缺口1.2吨按生产5天＋发运3天计算，预计8天到货。'},
+      missingCycle:{qty:900,quote:175.04,coupon:0,supply:'missing',summary:'<strong>参数缺失：</strong>需求超过10吨现货，但生产或发运周期未维护，显示“交期待确认”。报价等校验通过后允许下单，具体交期由业务后续确认。'},
+      overPermission:{qty:20,quote:170,coupon:0,supply:'spot',summary:'<strong>销售报价超权限，阻断提交：</strong>用券前的“我的报价”低于当前销售最低可报价格，直接提示并阻断；优惠券抵扣不算作销售让利。'},
+      aboveList:{qty:20,quote:180,coupon:0,supply:'spot',summary:'<strong>报价高于挂牌价，禁用优惠：</strong>允许销售提高报价，但优惠券与销售折扣自动禁用。'},
+      couponBelowCost:{qty:20,quote:171.54,coupon:300,supply:'spot',summary:'<strong>销售折扣叠加优惠券后低于成本，允许提交：</strong>销售报价不低于当前销售最低可报价格，校验通过后再抵扣优惠券；券后低于成本不拦截、不审批，由运营担责。'}
+    };
+    function applyScenario(key){
+      const s=scenarios[key];state.scenario=key;$('#scenarioSelect').value=key;$('#scenarioSummary').innerHTML=s.summary;
+      $('#qty').value=s.qty;$('#quote').value=s.quote;state.coupon=s.coupon;state.supplyMode=s.supply;$('#couponSelect').value=String(s.coupon);
+      state.orderEntry='oem';state.scenarioPreview=true;switchPhoneView('brandAdjustedOrderView');updateQuote();
+    }
+    function supplyResult(qty){
+      const supply=SalesQuoteCore.supply({tons:qty*OEM_WEIGHT_KG/1000,stockTons:OEM_STOCK_TONS,mode:state.supplyMode});
+      return {...supply,tone:supply.error?'error':supply.label==='现货'?'ok':'warn',detail:supply.detail||supply.error};
+    }
+    function markCustom(){state.scenario='custom'}
+    function updateQuote(){
+      const qty=Math.max(1,Number($('#qty').value||1)),quote=Number($('#quote').value||0),supply=supplyResult(qty);const listTotal=LIST*qty,quoteTotal=quote*qty,permissionFloor=SalesQuoteCore.floorPrice(LIST,OEM_WEIGHT_KG),floor=permissionFloor,salesDiscount=Math.max(0,listTotal-quoteTotal);let payable=quoteTotal-state.coupon;
+      const higher=quote>LIST+.001;$('#couponSelect').disabled=higher;if(higher&&state.coupon){state.coupon=0;$('#couponSelect').value='0';payable=quoteTotal}
+      $('#listTotal').textContent=money(listTotal);$('#salesDiscount').textContent='-'+money(salesDiscount);$('#couponAmount').textContent='-'+money(state.coupon);$('#payable').textContent=money(Math.max(0,payable));$('#stockText').textContent=OEM_STOCK_TONS+'吨';
+      $('#supplyDetail').textContent=supply.detail;$('#deliveryValue').textContent=supply.days===null?'交期待确认':`预计${supply.days}天 · ${supply.label}`;$('#deliveryValue').style.color=supply.tone==='error'?'var(--red)':supply.tone==='warn'?'var(--amber)':'var(--green)';
+      let err=supply.error||'';
+      if(!err&&quote<=0)err='请填写有效报价。';
+      else if(!err&&quote<permissionFloor-.001)err=`当前最低可报 ${money(permissionFloor)}/桶；本次报价已超出2%销售授权。`;
+      const belowCostAfterCoupon=!higher&&payable<COST*qty;
+      $('#inlineError').textContent=err;$('#inlineError').style.display=err?'block':'none';$('#quote').classList.toggle('bad',!!err&&!supply.error);$('#submitOrder').disabled=!!err;
+      $('#quoteHint').textContent=higher?'高于挂牌价：允许报价，但优惠券与销售折扣不可用':`销售授权2% · 最低可报 ${money(floor)}/桶`;$('#quoteHint').classList.toggle('error',!!err&&!supply.error);
+      $('#subsidy').style.display=!err&&state.coupon>0&&belowCostAfterCoupon?'block':'none';
+      const conclusion=err?`暂不可提交意向单 · ${err}`:`可提交意向单 · ${supply.days===null?'交期待确认 · ':`预计${supply.days}天到货 · `}客户应付${money(Math.max(0,payable))}`;$('#decisionLine').textContent=conclusion;$('#decisionLine').className='decision-line '+(err?'error':supply.tone==='warn'?'warn':'');
+    }
+    $('#scenarioSelect').onchange=e=>applyScenario(e.target.value);
+    $('#qty').oninput=()=>{markCustom();updateQuote()};$('#quote').oninput=()=>{markCustom();updateQuote()};
+    $('#couponSelect').onchange=()=>{markCustom();state.coupon=Number($('#couponSelect').value);updateQuote()};
+    $('#saveDraft').onclick=()=>showToast('草稿已保存，不占用库存');
+    const oemProducts={
+      hm68:{name:'抗磨液压油 L-HM 68（高清高压）白色 马石油',price:'¥10,940.00',floor:'¥10,721.20',stock:'10吨',supplyLabel:'现货',spec:'20L/16kg',weightKg:16,qty:20,orderPrice:175.04,orderFloor:171.54,eta:3},
+      hm46:{name:'抗磨液压油 L-HM 46（高清高压）白色 马石油',price:'¥10,700.63',floor:'¥10,486.62',stock:'0吨',supplyLabel:'生产补足',spec:'20L/16kg',weightKg:16,qty:20,orderPrice:171.21,orderFloor:167.79,eta:8}
+    };
+    const brandProducts={
+      hydraulic:{name:'腾原智造 抗磨液压油 L-HM 46（高压）淡黄色 170kg/桶 蓝盖蓝黄蓝桶',brand:'腾原智造',price:'¥1910',floor:'¥1871.80',stock:'68桶',supplyLabel:'现货',availability:'有库存',availabilityClass:'in-stock',spec:'170kg/桶',weightKg:170,qty:10,orderPrice:1910,orderFloor:1871.80,eta:3},
+      compressor:{name:'腾原智造 优选·经典 回转式空气压缩机油 L-DAH 46淡黄色 170kg/桶 浅蓝色',brand:'腾原智造 优选·经典',price:'¥1980',floor:'¥1940.40',stock:'0桶',supplyLabel:'生产补足',availability:'无库存',availabilityClass:'out-stock',spec:'170kg/桶',weightKg:170,qty:10,orderPrice:1980,orderFloor:1940.40,eta:8}
+    };
+    Object.values({...oemProducts,...brandProducts}).forEach(p=>{p.qty='';p.myQuote='';p.commission='';});
+    function intentKeys(){return[...state.oemIntent.map(id=>`oem:${id}`),...state.brandIntent.map(id=>`brand:${id}`)]}
+    function renderIntentList(){
+      const keys=intentKeys();state.intentChecked=state.intentChecked.filter(key=>keys.includes(key));
+      const count=keys.length,checkedCount=state.intentChecked.length;
+      [['hm68','#toggleOem68'],['hm46','#toggleOem46']].forEach(([id,selector])=>{const selected=state.oemIntent.includes(id),button=$(selector);button.textContent=selected?'− 撤销':'＋加入意向清单';button.className=selected?'oem-remove':'oem-add'});
+      [['hydraulic','#toggleBrandHydraulic'],['compressor','#toggleBrandCompressor']].forEach(([id,selector])=>{const selected=state.brandIntent.includes(id),button=$(selector);button.textContent=selected?'− 撤销':'＋加入意向清单';button.className=selected?'brand-add disabled':'brand-add'});
+      $('#goCreate').textContent=`意向产品清单（${count}）`;$('#goCreate').disabled=count===0;
+      $('#goBrandIntent').textContent=`意向产品清单（${count}）`;$('#goBrandIntent').disabled=count===0;
+      $('#goIntentOrder').textContent=`去下单(${checkedCount})`;$('#goIntentOrder').disabled=checkedCount===0;
+      const allIntentSelected=count>0&&checkedCount===count;$('#selectAllIntent').classList.toggle('selected',allIntentSelected);$('#selectAllIntent').setAttribute('aria-pressed',String(allIntentSelected));$('#selectAllIntent').disabled=count===0;
+      const oemCards=state.oemIntent.map(id=>{const key=`oem:${id}`,p=oemProducts[id],checked=state.intentChecked.includes(key);return `<div class="brand-card brand-select-card"><button class="brand-check ${checked?'':'off'}" data-intent-check="${key}" aria-label="${checked?'取消选择':'选择'}${p.name}">${checked?'✓':''}</button><div class="brand-title">${p.name}</div><span class="oem-type">成品油</span><div class="brand-meta">开票名称：抗磨液压油<br/>提货地点：肇庆仓库</div><div class="tier-price"><div class="tier-row"><span>产品价格（元/吨）</span><strong>${p.price}</strong></div><div class="tier-row"><span>当前销售最低可报（元/吨）</span><strong>${p.floor}</strong></div></div><div class="brand-result">可售库存：${p.stock}<br>预计交期：${p.eta==null?'交期待确认':`预计${p.eta}天 · ${p.supplyLabel}`}</div></div>`});
+      const brandCards=state.brandIntent.map(id=>{const key=`brand:${id}`,p=brandProducts[id],checked=state.intentChecked.includes(key);return `<div class="brand-card brand-select-card"><button class="brand-check ${checked?'':'off'}" data-intent-check="${key}" aria-label="${checked?'取消选择':'选择'}${p.name}">${checked?'✓':''}</button><div class="brand-title">${p.name}</div><span class="stock-badge ${p.availabilityClass}">${p.availability}</span><div class="brand-meta">提货地点：肇庆仓库<br/>品牌：${p.brand}</div><div class="tier-price"><div class="tier-row"><span>产品价格（元/桶）</span><strong>${p.price}</strong></div><div class="tier-row"><span>当前销售最低可报（元/桶）</span><strong>${p.floor}</strong></div></div><div class="brand-result">可售库存：${p.stock}<br>预计交期：${p.eta==null?'交期待确认':`预计${p.eta}天 · ${p.supplyLabel}`}</div></div>`});
+      $('#intentProductList').innerHTML=count?[...oemCards,...brandCards].join(''):`<div class="mobile-card" style="margin:16px;padding:26px 16px;text-align:center;color:var(--muted)">暂未选择意向产品，请返回报价页添加</div>`;
+      $$('[data-intent-check]').forEach(button=>button.onclick=()=>{const key=button.dataset.intentCheck,index=state.intentChecked.indexOf(key);if(index>=0)state.intentChecked.splice(index,1);else state.intentChecked.push(key);renderIntentList()});
+    }
+    const DEMO_FREIGHT_RATE=60;
+    let intentOrderSummary={base:0,coupon:0,tons:0,count:0,maxEta:0,scenarioError:'',scenarioNote:''};
+    let latestOrderSnapshot=null;
+    function getScenarioOrderState(){
+      if(!state.scenarioPreview)return null;
+      const config=scenarios[state.scenario]||scenarios.spot,qty=state.scenario==='custom'?Math.max(1,Number($('#qty').value||20)):(config.qty||20),quote=state.scenario==='custom'?Number($('#quote').value||LIST):(config.quote||LIST),coupon=quote>LIST?0:(config.coupon??state.coupon),supply=supplyResult(qty),permissionFloor=SalesQuoteCore.floorPrice(LIST,OEM_WEIGHT_KG);let error=supply.error||'',note=supply.days===null?'交期待确认，由业务后续确认':'报价校验通过';
+      if(!error&&quote<permissionFloor-.001)error=`当前报价低于销售最低可报${money(permissionFloor)}/桶，已超出2%销售授权。`;
+      const belowCostAfterCoupon=quote<=LIST&&quote*qty-coupon<COST*qty;
+      if(state.scenario==='aboveList')note='高于挂牌价，优惠券与销售折扣已禁用';
+      if(state.scenario==='couponBelowCost'&&belowCostAfterCoupon)note='用券后低于成本，运营担责，允许提交';
+      return{config,qty,quote,coupon,supply,error,note};
+    }
+    const packageSourceLabels={public:'公模（公模公桶公标）',custom:'定制化（定制化桶或标签）',customer:'客供包材（客供桶及标签）'};
+    function isBrandOrder(){return state.orderEntry==='brand'&&!state.scenarioPreview}
+    function renderOrderPackaging(){
+      const locked=isBrandOrder(),trigger=$('#packageSource');
+      if(locked)state.packageSource='public';
+      $('#packagingMethodText').textContent=locked?'桶装':'桶装 ›';
+      trigger.disabled=locked;trigger.style.display=locked?'none':'';trigger.dataset.value=state.packageSource;
+      $('#packageSourceText').textContent=packageSourceLabels[state.packageSource];
+      $('#packageSourceReadonly').hidden=!locked;
+      if(locked)closePackageSourceSheet(false);
+      renderPackageFields();
+    }
+    function resolvedPackagingPrice(p){return state.packageSource!=='custom'?0:(p.packagingPrices?.[state.packageSource]??'')}
+    function detailEtaText(eta){return eta?.days==null?'交期待确认':`预计${eta.days}天 · ${eta.label}`}
+    function detailEscape(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+    function detailProductsMarkup(rows,freight){
+      const tons=rows.reduce((sum,row)=>sum+row.tons,0);
+      const field=(name,value)=>`<div class="detail-field"><span>${name}</span><strong>${detailEscape(value)}</strong></div>`;
+      return `<div class="detail-product-section-head"><span>产品明细</span><span>共${rows.length}项</span></div>`+rows.map(row=>{
+        const freightUnit=tons>0?freight*row.weightKg/1000/tons:0;
+        return `<div class="detail-product-name">${detailEscape(row.name)}</div>`+
+          field('包装规格',row.spec)+field('包装颜色',row.color)+field('容积',row.spec.split('/')[0])+field('重量(kg)',row.weightKg)+
+          field('包装数量(桶)',row.qty)+field('产品单价(元/桶)',row.price.toFixed(2))+field('我的报价(元/桶)',row.quote.toFixed(2))+
+          field('当前销售最低可报',`${money(row.floor)}/桶`)+field('包材单价(元/桶)',row.packagingPrice.toFixed(2))+
+          field('佣金单价(元/吨)',row.commission.toFixed(2))+field('运费单价(元/桶)',freightUnit.toFixed(2))+
+          field('交易单价(元/桶)',(row.quote+row.packagingPrice).toFixed(2))+field('小计(元)',(row.amount+row.packagingAmount).toFixed(2))+
+          (rows.length>1?field('预计交期',detailEtaText(row.eta)):'');
+      }).join('');
+    }
+    function syncDownstreamPages({isDelivery=false,freight=0,payable=intentOrderSummary.base}={}){
+      const s=latestOrderSnapshot;if(!s)return;
+      const etaText=s.count===1?detailEtaText(s.rows[0].eta):s.eta;
+      $('#listOrderAmount').textContent=money(payable);
+      for(const prefix of ['detail','formal']){
+        $('#'+prefix+'PackageSource').textContent=packageSourceLabels[state.packageSource];
+        $('#'+prefix+'EtaLabel').textContent=s.count>1?'总预计交期':'预计交期';
+        $('#'+prefix+'Eta').textContent=etaText;
+        $('#'+prefix+'Products').innerHTML=detailProductsMarkup(s.rows,freight);
+        $('#'+prefix+'DeliveryMethod').textContent=isDelivery?'配送':'自提';
+        $('#'+prefix+'DeliveryAddressRow').style.display=isDelivery?'grid':'none';
+        $('#'+prefix+'ProductTotal').textContent=money(s.productQuoteTotal);
+        $('#'+prefix+'PackagingTotal').textContent=money(s.packagingTotal);
+        $('#'+prefix+'FreightTotal').textContent=money(freight);
+        $('#'+prefix+'CouponTotal').textContent='-'+money(s.coupon);
+        $('#'+prefix+'OrderTotal').textContent=money(payable);
+      }
+      $('#formalStockStatus').textContent=s.count===1?`正式占用${s.quantity}桶`:`${s.count}款商品库存已正式占用`;
+    }
+    function renderPackageSourceOptions(value){$$('[data-package-option]').forEach(option=>{const selected=option.dataset.packageOption===value;option.classList.toggle('selected',selected);option.setAttribute('aria-pressed',String(selected))})}
+    function openPackageSourceSheet(){if(isBrandOrder())return;const sheet=$('#packageSourceSheet'),current=$('#packageSource').dataset.value;sheet.dataset.pending=current;renderPackageSourceOptions(current);sheet.classList.add('open');sheet.setAttribute('aria-hidden','false');$('#packageSource').setAttribute('aria-expanded','true');const selected=sheet.querySelector(`[data-package-option="${current}"]`);if(selected)selected.focus()}
+    function closePackageSourceSheet(restoreFocus=true){const sheet=$('#packageSourceSheet');if(!sheet)return;sheet.classList.remove('open');sheet.setAttribute('aria-hidden','true');const trigger=$('#packageSource');if(trigger)trigger.setAttribute('aria-expanded','false');if(restoreFocus&&trigger)trigger.focus()}
+    function selectPendingPackageSource(value){$('#packageSourceSheet').dataset.pending=value;renderPackageSourceOptions(value)}
+    function confirmPackageSource(){if(isBrandOrder()){closePackageSourceSheet(false);return}const value=$('#packageSourceSheet').dataset.pending||state.packageSource;state.packageSource=value;$('#packageSource').dataset.value=value;$('#packageSourceText').textContent=packageSourceLabels[value];closePackageSourceSheet();renderPackageFields();renderIntentOrder()}
+    function renderPackageFields(){const customer=state.packageSource==='customer';$('#customerPackagingDaysRow').classList.toggle('visible',customer);$('#customerLabelDaysRow').classList.toggle('visible',customer)}
+    function packageFieldsMarkup(p,index){
+      const productPrice=p.productUnitPrice??p.orderPrice,myQuote=p.myQuote??p.orderPrice,packagingPrice=resolvedPackagingPrice(p);
+      const commissionPerTon=p.commission??'';
+      const quantity=`<div class="brand-form-row"><span class="required">包装数量(桶)</span><input class="intent-qty-input" data-item-index="${index}" value="${Number.isFinite(Number(p.qty))?p.qty:''}" placeholder="请输入包装数量" inputmode="numeric"/></div>`;
+      const coupon=index===0?`<div class="brand-form-row"><span>优惠券</span><select id="intentCouponSelect"><option value="0">不使用优惠券</option><option value="50">立减¥50</option><option value="300">运营补贴¥300</option></select></div>`:'';
+      const etaLabel=p.supplyLabel;
+      const eta=`<div class="brand-form-row"><span class="eta-label">预计交期<button class="eta-help" type="button" aria-label="查看预计交期说明" aria-expanded="false">?</button><span class="eta-popover" role="tooltip">实际交期以现场生产为主</span></span><span class="brand-value intent-eta-value" data-item-index="${index}" style="color:var(--amber)">${p.eta==null?'交期待确认':`预计${p.eta}天 · ${etaLabel}`}</span></div>`;
+      const pricing=`<div class="brand-form-row"><span class="required">产品单价(元/桶)</span><span class="brand-value">${Number(productPrice).toFixed(2)}</span></div><div class="brand-form-row"><span class="required">我的报价(元/桶)</span><input class="intent-quote-input" data-item-index="${index}" value="${myQuote===''||!Number.isFinite(Number(myQuote))?'':Number(myQuote).toFixed(2)}" placeholder="请输入我的报价" inputmode="decimal"/></div><div class="brand-price-hint">当前销售最低可报：${money(p.orderFloor)}/桶</div>${state.packageSource==='public'?'':`<div class="brand-form-row"><span class="required">包材单价(元/桶)</span>${state.packageSource==='customer'?'<span class="brand-value">0</span>':`<input class="intent-packaging-input" data-item-index="${index}" type="number" min="0" step="0.01" value="${detailEscape(packagingPrice)}" placeholder="请输入包材单价" inputmode="decimal" aria-label="包材单价"/>`}</div>`}<div class="brand-form-row"><span>佣金单价(元/吨)</span><input class="intent-commission-input" data-item-index="${index}" type="number" min="0" step="0.01" value="${detailEscape(commissionPerTon)}" placeholder="请输入佣金单价" inputmode="decimal" aria-label="佣金单价"/></div>${coupon}${eta}`;
+      if(state.packageSource==='custom')return `<div class="brand-form-row"><span>包装规格</span><span></span></div><div class="brand-form-row"><span class="required">容积</span><input placeholder="请输入包装规格" inputmode="decimal"/></div><div class="brand-form-row"><span class="required">重量(kg)</span><input placeholder="请输入重量(kg)" inputmode="decimal"/></div>${quantity}<div class="brand-form-row"><span class="required">包材需求</span><textarea class="package-demand" placeholder="请输入包材需求"></textarea></div><div class="brand-form-row"><span>包材需求附件</span><button class="upload-box" type="button">＋ 上传图片</button></div>${pricing}`;
+      if(state.packageSource==='customer')return `<div class="brand-form-row"><span>包装规格</span><span class="brand-value">${p.spec}</span></div><div class="brand-form-row"><span class="required">容积</span><span class="brand-value">${p.spec.split('/')[0]}</span></div><div class="brand-form-row"><span>重量(kg)</span><span class="brand-value">${p.weightKg}</span></div>${quantity}${pricing}`;
+      return `<div class="brand-form-row"><span>包装规格</span><span class="brand-value">${p.spec}</span></div><div class="brand-form-row"><span class="required">容积</span><div class="select-entry"><select aria-label="选择容积"><option>${p.spec.split('/')[0]}</option><option>18L</option><option>200L</option></select><span class="chevron">&gt;</span></div></div><div class="brand-form-row"><span>重量(kg)</span><span class="brand-value">${p.weightKg}</span></div>${quantity}${pricing}`;
+    }
+    function renderDeliveryMethodOptions(value){$$('[data-delivery-option]').forEach(option=>{const selected=option.dataset.deliveryOption===value;option.classList.toggle('selected',selected);option.setAttribute('aria-pressed',String(selected))})}
+    function openDeliveryMethodSheet(){const sheet=$('#deliveryMethodSheet'),current=$('#deliveryMethod').dataset.value;sheet.dataset.pending=current;renderDeliveryMethodOptions(current);sheet.classList.add('open');sheet.setAttribute('aria-hidden','false');$('#deliveryMethod').setAttribute('aria-expanded','true');const selected=sheet.querySelector(`[data-delivery-option="${current}"]`);if(selected)selected.focus()}
+    function closeDeliveryMethodSheet(restoreFocus=true){const sheet=$('#deliveryMethodSheet');if(!sheet)return;sheet.classList.remove('open');sheet.setAttribute('aria-hidden','true');const trigger=$('#deliveryMethod');if(trigger)trigger.setAttribute('aria-expanded','false');if(restoreFocus&&trigger)trigger.focus()}
+    function selectPendingDeliveryMethod(value){$('#deliveryMethodSheet').dataset.pending=value;renderDeliveryMethodOptions(value)}
+    function confirmDeliveryMethod(){const value=$('#deliveryMethodSheet').dataset.pending||$('#deliveryMethod').dataset.value,label=value==='delivery'?'配送':'自提';$('#deliveryMethod').dataset.value=value;$('#deliveryMethodText').textContent=label;closeDeliveryMethodSheet();updateDeliveryPricing()}
+    function updateDeliveryPricing(){
+      const isDelivery=$('#deliveryMethod').dataset.value==='delivery',hasAddress=Boolean($('#deliveryAddress').value),button=$('#brandSubmitOrder'),scenarioError=intentOrderSummary.scenarioError,coupon=intentOrderSummary.coupon||0;
+      $('#deliveryAddressRow').style.display=isDelivery?'flex':'none';$('#freightFields').style.display=isDelivery?'block':'none';$('#intentFreightTotalRow').style.display=isDelivery?'flex':'none';
+      $('#intentCouponAmount').textContent='-'+money(coupon);
+      if(!isDelivery){
+        const payable=Math.max(0,intentOrderSummary.base-coupon);$('#intentPayable').textContent=money(payable);$('#intentFooterTotal').textContent=money(payable);$('#intentOrderDecision').textContent=scenarioError?`暂不可提交意向单 · ${scenarioError}`:`可提交意向单 · ${intentOrderSummary.count}款商品 · ${intentOrderSummary.maxEta===null?'交期待确认 · ':`预计交期${intentOrderSummary.maxEta}天 · `}${intentOrderSummary.scenarioNote||'报价校验通过'} · 自提不展示运费`;$('#intentOrderDecision').className='decision-line '+(scenarioError?'error':intentOrderSummary.maxEta===null?'warn':'');button.disabled=Boolean(scenarioError);syncDownstreamPages({isDelivery:false,freight:0,payable});return;
+      }
+      if(!hasAddress){
+        const payable=Math.max(0,intentOrderSummary.base-coupon);$('#freightQuote').textContent='选择配送地址后自动带出';$('#freightHint').textContent='来源：后台附加项；未匹配到有效运费时不能提交。';$('#intentFreightTotal').textContent='待确认';$('#intentPayable').textContent=money(payable);$('#intentFooterTotal').textContent=money(payable);$('#intentOrderDecision').textContent='请选择配送地址，系统将从后台附加项匹配运费';$('#intentOrderDecision').className='decision-line error';button.disabled=true;syncDownstreamPages({isDelivery:true,freight:0,payable});return;
+      }
+      const freight=intentOrderSummary.tons*DEMO_FREIGHT_RATE,payable=Math.max(0,intentOrderSummary.base+freight-coupon);
+      $('#freightQuote').textContent=`${money(DEMO_FREIGHT_RATE)}/吨（后台维护区价）`;$('#freightHint').textContent=`已匹配后台附加项：肇庆仓库 → 江门，订单${intentOrderSummary.tons.toFixed(2)}吨。`;$('#intentFreightTotal').textContent=money(freight);$('#intentPayable').textContent=money(payable);$('#intentFooterTotal').textContent=money(payable);$('#intentOrderDecision').textContent=scenarioError?`暂不可提交意向单 · ${scenarioError}`:`可提交意向单 · 已自动带出运费${money(freight)} · ${intentOrderSummary.count}款商品 · ${intentOrderSummary.maxEta===null?'交期待确认，由业务后续确认':`预计交期${intentOrderSummary.maxEta}天`}`;$('#intentOrderDecision').className='decision-line '+(scenarioError?'error':intentOrderSummary.maxEta===null?'warn':'');button.disabled=Boolean(scenarioError);syncDownstreamPages({isDelivery:true,freight,payable});
+    }
+    function renderIntentOrder(){
+      renderOrderPackaging();
+      const scenarioState=getScenarioOrderState();
+      if(scenarioState)state.intentCoupon=scenarioState.coupon;
+      const items=scenarioState?[{type:'oem',p:{...oemProducts.hm68,qty:scenarioState.qty,productUnitPrice:LIST,myQuote:scenarioState.quote,orderPrice:scenarioState.quote,eta:scenarioState.supply.days,stock:'10吨',supplyLabel:scenarioState.supply.label}}]:state.intentChecked.map(key=>{const [type,id]=key.split(':');return{type,p:type==='oem'?oemProducts[id]:brandProducts[id]}});
+      $('#intentOrderProducts').innerHTML=items.map(({type,p},index)=>`<div class="brand-product-head"><span><small>${type==='oem'?'OEM报价':'品牌报价'}</small><br/>${p.name}</span><span class="brand-product-actions">复制 <b>删除</b></span></div>${packageFieldsMarkup(p,index)}<div class="brand-result" style="margin:8px 16px">可售库存：${p.stock}</div>`).join('');
+      const refreshOrderAmounts=()=>{
+        const lines=items.map(({type,p})=>{
+          const base=SalesQuoteCore.products.find(item=>item.type===type&&item.name===p.name)||SalesQuoteCore.products.find(item=>item.type===type&&item.price===(p.productUnitPrice??p.orderPrice));
+          return {name:p.name,qty:p.qty,quote:p.myQuote??p.orderPrice,price:p.productUnitPrice??p.orderPrice,floor:p.orderFloor,weightKg:p.weightKg,cost:base?.cost||0,stockTons:base?.stockTons??0,supplyMode:scenarioState?state.supplyMode:'auto',commission:p.commission??0,packagingRequired:true,packagingPrice:resolvedPackagingPrice(p)};
+        });
+        const checked=SalesQuoteCore.evaluate({lines,coupon:state.intentCoupon});
+        if(checked.couponDisabled)state.intentCoupon=0;
+        $('#intentCouponSelect').disabled=checked.couponDisabled;$('#intentCouponSelect').value=String(state.intentCoupon);
+        $$('.intent-eta-value').forEach((node,index)=>{const eta=checked.rows[index].eta;node.textContent=eta.days===null?'交期待确认':`预计${eta.days}天 · ${eta.label}`;node.style.color=eta.error?'var(--red)':'var(--amber)';});
+        const first=items[0]?.p,maxEta=checked.maxEta;
+        intentOrderSummary={base:checked.productTotal+checked.packagingTotal,coupon:checked.coupon,tons:checked.tons,count:items.length,maxEta,scenarioError:checked.errors[0]||'',scenarioNote:maxEta===null?'交期由业务后续确认':checked.belowCostAfterCoupon?'用券后低于成本，运营担责，允许提交':checked.couponDisabled?'高于挂牌价，优惠券已禁用':'报价校验通过'};
+        if(first){const productPrice=first.productUnitPrice??first.orderPrice,myQuote=first.myQuote??first.orderPrice;latestOrderSnapshot={rows:checked.rows.map((row,index)=>({...row,spec:items[index].p.spec,color:items[index].p.name.includes('白色')?'白色':'淡黄色'})),quantity:first.qty,productPrice,myQuote,floorPrice:first.orderFloor,packagingPrice:resolvedPackagingPrice(first),commission:checked.rows[0].commission,productQuoteTotal:checked.productTotal,packagingTotal:checked.packagingTotal,coupon:checked.coupon,count:items.length,eta:maxEta===null?'交期待确认':`预计${maxEta}天`};}
+        $('#intentListTotal').textContent=money(checked.listTotal);$('#intentSalesDiscount').textContent='-'+money(checked.salesDiscount);updateDeliveryPricing();
+      };
+      refreshOrderAmounts();
+      $$('.intent-commission-input').forEach(input=>input.oninput=()=>{const p=items[Number(input.dataset.itemIndex)]?.p;if(!p)return;p.commission=input.value;if(scenarioState)oemProducts.hm68.commission=input.value;refreshOrderAmounts()});
+      $$('.intent-packaging-input').forEach(input=>input.oninput=()=>{const p=items[Number(input.dataset.itemIndex)]?.p;if(!p)return;(p.packagingPrices??={})[state.packageSource]=input.value;if(scenarioState)(oemProducts.hm68.packagingPrices??={})[state.packageSource]=input.value;refreshOrderAmounts()});
+      $$('.intent-quote-input').forEach(input=>input.oninput=()=>{const p=items[Number(input.dataset.itemIndex)]?.p;if(!p)return;p.myQuote=input.value===''?'':Number(input.value);refreshOrderAmounts()});
+      $$('.intent-qty-input').forEach(input=>input.oninput=()=>{const p=items[Number(input.dataset.itemIndex)]?.p;if(!p)return;p.qty=input.value===''?'':Number(input.value);refreshOrderAmounts()});
+      $('#intentCouponSelect').onchange=()=>{state.intentCoupon=Number($('#intentCouponSelect').value||0);refreshOrderAmounts()};
+    }
+    function toggleOemIntent(id){const key=`oem:${id}`,index=state.oemIntent.indexOf(id);if(index>=0){state.oemIntent.splice(index,1);state.intentChecked=state.intentChecked.filter(item=>item!==key);showToast('已从意向清单移除')}else{state.oemIntent.push(id);state.intentChecked.push(key);showToast('已加入意向清单')}renderIntentList()}
+    function toggleBrandIntent(id){const key=`brand:${id}`,index=state.brandIntent.indexOf(id);if(index>=0){state.brandIntent.splice(index,1);state.intentChecked=state.intentChecked.filter(item=>item!==key);showToast('已从意向清单移除')}else{state.brandIntent.push(id);state.intentChecked.push(key);showToast('已加入意向清单')}renderIntentList()}
+    $('#toggleOem68').onclick=()=>toggleOemIntent('hm68');$('#toggleOem46').onclick=()=>toggleOemIntent('hm46');
+    $('#toggleBrandHydraulic').onclick=()=>toggleBrandIntent('hydraulic');$('#toggleBrandCompressor').onclick=()=>toggleBrandIntent('compressor');
+    $('#selectAllIntent').onclick=()=>{const keys=intentKeys();state.intentChecked=keys.length>0&&state.intentChecked.length===keys.length?[]:[...keys];renderIntentList()};
+    $('#goCreate').onclick=()=>{if(intentKeys().length){state.intentEntry='oem';switchPhoneView('intentListView')}};
+    $('#goBrandIntent').onclick=()=>{if(intentKeys().length){state.intentEntry='brand';switchPhoneView('intentListView')}};
+    $('#goIntentOrder').onclick=()=>{if(state.intentChecked.length){state.orderEntry=state.intentEntry;state.scenarioPreview=false;switchPhoneView('brandAdjustedOrderView')}};
+    $('#packageSource').onclick=openPackageSourceSheet;$$('[data-package-option]').forEach(option=>option.onclick=()=>selectPendingPackageSource(option.dataset.packageOption));$('#confirmPackageSource').onclick=confirmPackageSource;$('#cancelPackageSource').onclick=()=>closePackageSourceSheet();$('#packageSourceSheet').onclick=e=>{if(e.target.id==='packageSourceSheet')closePackageSourceSheet()};
+    $('#deliveryMethod').onclick=openDeliveryMethodSheet;$$('[data-delivery-option]').forEach(option=>option.onclick=()=>selectPendingDeliveryMethod(option.dataset.deliveryOption));$('#confirmDeliveryMethod').onclick=confirmDeliveryMethod;$('#cancelDeliveryMethod').onclick=()=>closeDeliveryMethodSheet();$('#deliveryMethodSheet').onclick=e=>{if(e.target.id==='deliveryMethodSheet')closeDeliveryMethodSheet()};document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#packageSourceSheet').classList.contains('open'))closePackageSourceSheet();else if($('#deliveryMethodSheet').classList.contains('open'))closeDeliveryMethodSheet()});$('#deliveryAddress').onchange=updateDeliveryPricing;
+    document.addEventListener('click',e=>{const trigger=e.target.closest('.eta-help'),current=trigger?.closest('.eta-label'),shouldOpen=current&&!current.classList.contains('open');$$('.eta-label.open').forEach(label=>{label.classList.remove('open');label.querySelector('.eta-help')?.setAttribute('aria-expanded','false')});if(shouldOpen){current.classList.add('open');trigger.setAttribute('aria-expanded','true')}});document.addEventListener('keydown',e=>{if(e.key==='Escape')$$('.eta-label.open').forEach(label=>{label.classList.remove('open');label.querySelector('.eta-help')?.setAttribute('aria-expanded','false')})});
+    $('#submitOrder').onclick=()=>{updateQuote();if($('#submitOrder').disabled)return;const qty=Math.max(1,Number($('#qty').value||1)),demandTons=qty*OEM_WEIGHT_KG/1000,supply=supplyResult(qty);state.orderStatus='reserved';$('#listStatusTag').textContent='待提交';$('#listCountdown').textContent='库存已预占 · 剩余23:59:59';$('#listCountdown').className='countdown';$('#convertOrder').disabled=false;$('#successIcon').textContent='✓';$('#successTitle').textContent='意向单已提交';$('#successText').textContent=demandTons<=OEM_STOCK_TONS?`已预占${demandTons.toFixed(2)}吨现货，有效期24小时。请在有效期内转为正式订单。`:`已记录${(demandTons-OEM_STOCK_TONS).toFixed(2)}吨补货需求并锁定当前可用资源，${supply.days===null?'交期待确认，由业务后续确认':`预计${supply.days}天到货`}；意向单有效期24小时。`;$('#releaseReservation').style.display='block';$('#confirmOrder').style.display='block';$('#confirmOrder').textContent='查看意向单';$('#successModal').classList.add('open')};
+    $('#brandSubmitOrder').onclick=()=>{updateDeliveryPricing();if($('#brandSubmitOrder').disabled){showToast($('#intentOrderDecision').textContent);return}const isDelivery=$('#deliveryMethod').dataset.value==='delivery';state.orderStatus='reserved';$('#listStatusTag').textContent='待提交';$('#listCountdown').textContent='库存已预占 · 剩余23:59:59';$('#listCountdown').className='countdown';$('#successIcon').textContent='✓';$('#successTitle').textContent='意向单已提交';$('#successText').textContent=isDelivery?`${intentOrderSummary.count}款商品报价校验通过，运费已从后台附加项自动带入订单。`:`${intentOrderSummary.count}款商品报价校验通过；本单为自提，不展示和计算运费。`;if(intentOrderSummary.maxEta===null)$('#successText').textContent+='交期待确认，由业务后续确认。';$('#releaseReservation').style.display='none';$('#confirmOrder').style.display='block';$('#confirmOrder').textContent='查看意向单';$('#successModal').classList.add('open')};
+    $('#releaseReservation').onclick=()=>{state.orderStatus='released';$('#successIcon').textContent='↻';$('#successTitle').textContent='预占已释放';$('#successText').textContent='模拟24小时未转订单：库存自动回到可售池，补货需求同步取消。';$('#listStatusTag').textContent='已失效';$('#listCountdown').textContent='预占已到期释放';$('#listCountdown').className='countdown expired';$('#convertOrder').disabled=true;$('#releaseReservation').style.display='none';$('#confirmOrder').textContent='查看意向单'};
+    $('#confirmOrder').onclick=()=>{$('#successModal').classList.remove('open');switchPhoneView('intentView')};
+    $('#openIntent').onclick=()=>switchPhoneView('intentView');$('#openIntent').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')switchPhoneView('intentView')};
+    $('#editIntent').onclick=()=>{state.scenarioPreview=false;switchPhoneView('brandAdjustedOrderView')};
+    $('#cancelIntent').onclick=()=>{state.orderStatus='released';$('#listStatusTag').textContent='已取消';$('#listCountdown').textContent='意向单已取消，库存已释放';$('#listCountdown').className='countdown expired';showToast('意向单已取消，库存已释放');switchPhoneView('listView')};
+    $('#convertOrder').onclick=()=>{if(state.orderStatus!=='reserved')return;state.orderStatus='formal';showToast('已转为正式订单，库存转正式占用');switchPhoneView('formalView')};
+    $('#closeSuccess').onclick=()=>$('#successModal').classList.remove('open');
+    function registerAgentTools(){
+      const context=document.modelContext;if(!context?.registerTool)return;
+      const lifecycle=new AbortController();
+      const register=tool=>Promise.resolve(context.registerTool(tool,{signal:lifecycle.signal})).catch(()=>{});
+      register({name:'configure_discount_rule',title:'配置销售折扣规则',description:'在PC销售端的运营管理中配置折扣规则。适用职级支持多选，可指定销售人员；产品范围支持全部产品、产品分类或指定产品；固定金额统一按元/吨配置。',inputSchema:{type:'object',properties:{name:{type:'string'},targetTypes:{type:'array',items:{type:'string',enum:['销售经理','销售经理主管','销售总监']},minItems:1,uniqueItems:true},sales:{type:'array',description:'指定销售ID；省略或空数组表示所选职级全部销售。',items:{type:'string',enum:['sales-001','sales-002','supervisor-001','supervisor-002','director-001','director-002']},uniqueItems:true},discountType:{type:'string',enum:['percent','fixed']},value:{type:'number',minimum:0},scopeType:{type:'string',enum:['all','category','product'],default:'all'},scopes:{type:'array',description:'scopeType 为 category 或 product 时必填；all 时省略或传空数组。',items:{type:'string',enum:['industrial','automotive','oem-hm68','oem-hm46','brand-hm46','brand-dah46']},uniqueItems:true},unit:{type:'string',enum:['吨']},cap:{type:'number',exclusiveMinimum:0},start:{type:'string'},end:{type:'string'},remark:{type:'string',maxLength:300}},required:['name','targetTypes','discountType','value','start','end'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){const result=window.PermissionAdmin.create(input);window.openDiscountAdmin?.();return result}});
+      register({name:'stage_sales_quote',title:'填写并校验销售报价',description:'在销售小程序Demo中填写数量、单价和优惠券，并返回当前报价能否提交意向单。',inputSchema:{type:'object',properties:{quantity:{type:'number',minimum:1},unitPrice:{type:'number',exclusiveMinimum:0},couponAmount:{type:'number',enum:[0,50,300]}},required:['quantity','unitPrice','couponAmount'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){if(!input||!Number.isFinite(input.quantity)||!Number.isFinite(input.unitPrice)||![0,50,300].includes(input.couponAmount))throw new Error('报价参数无效');$('#qty').value=input.quantity;$('#quote').value=input.unitPrice;state.coupon=input.unitPrice>LIST?0:input.couponAmount;$('#couponSelect').value=String(state.coupon);markCustom();state.scenarioPreview=true;switchPage('mobile');switchPhoneView('brandAdjustedOrderView');updateQuote();return{canSubmit:!$('#brandSubmitOrder').disabled,quantity:input.quantity,unitPrice:input.unitPrice,couponAmount:state.coupon,message:$('#intentOrderDecision').textContent}}});
+    }
+    renderRules();renderIntentList();renderPackageFields();renderIntentOrder();switchPhoneView('quoteView');
+    registerAgentTools();
+  </script>
+  <script src="./permission-admin.js?v=a671b5a3463d"></script>
+  <script src="./pc-sales.js?v=0e37cbed1d30"></script>
+</body>
+</html>
